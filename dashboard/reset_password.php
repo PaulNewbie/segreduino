@@ -54,5 +54,5 @@ if ($stmt->execute() && $stmt->affected_rows > 0) {
 
 // ✅ Clean up
 $stmt->close();
-$conn->close();
+
 ?>

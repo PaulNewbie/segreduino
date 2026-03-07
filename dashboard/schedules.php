@@ -95,7 +95,7 @@ try {
         'tasks' => $schedules
     ]);
 
-    $conn->close();
+    
 
 } catch (Exception $e) {
     http_response_code(500);

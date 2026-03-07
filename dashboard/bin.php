@@ -253,7 +253,7 @@ if ($result && $result->num_rows > 0) {
 } else {
     echo "<tr><td colspan='3'>No kiosks found.</td></tr>";
 }
-$conn->close();
+
 ?>
         </tbody>
       </table>
@@ -315,7 +315,7 @@ $conn->close();
     } else {
         echo "<tr><td colspan='5'>No bins found.</td></tr>";
     }
-    $conn->close();
+    
     ?>
   </tbody>
 </table>
@@ -368,7 +368,7 @@ $conn->close();
             echo "<option value='".htmlspecialchars($m['machine_id'])."'>".htmlspecialchars($m['machine_name'])."</option>";
           }
         }
-        $conn->close();
+        
         ?>
       </select>
     </label>

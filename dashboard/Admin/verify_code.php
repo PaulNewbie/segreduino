@@ -46,7 +46,7 @@ if (isset($_POST['verification_code'])) {
     $stmt->close();
 }
 
-$conn->close();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

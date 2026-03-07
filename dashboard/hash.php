@@ -36,4 +36,3 @@ if ($result) {
     echo "<span style='color:red;'>Error fetching users: " . $conn->error . "</span>";
 }
 
-$conn->close();

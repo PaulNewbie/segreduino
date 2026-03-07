@@ -45,7 +45,7 @@ try {
     }
 
     $stmt->close();
-    $conn->close();
+    
 
 } catch (Exception $e) {
     http_response_code(500);

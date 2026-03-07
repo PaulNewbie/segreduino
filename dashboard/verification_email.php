@@ -51,7 +51,7 @@ $result = $stmt->get_result();
 if ($result->num_rows === 0) {
     echo json_encode(['success' => false, 'message' => 'Email not found.']);
     $stmt->close();
-    $conn->close();
+    
     exit;
 }
 $stmt->close();
@@ -66,7 +66,7 @@ $stmt->bind_param("sss", $code, $expiry, $email);
 if (!$stmt->execute()) {
     echo json_encode(['success' => false, 'message' => 'Failed to save code.']);
     $stmt->close();
-    $conn->close();
+    
     exit;
 }
 $stmt->close();
@@ -95,5 +95,5 @@ try {
     echo json_encode(['success' => false, 'message' => 'Mailer Error: ' . $mail->ErrorInfo]);
 }
 
-$conn->close();
+
 exit;

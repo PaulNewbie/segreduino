@@ -15,4 +15,4 @@ while($row = $res->fetch_assoc()){
 }
 header('Content-Type: application/json');
 echo json_encode($alerts);
-$conn->close();
+

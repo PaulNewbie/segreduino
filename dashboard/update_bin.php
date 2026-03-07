@@ -45,4 +45,4 @@ $data = [];
 $result = $conn->query("SELECT * FROM trash_bins ORDER BY bin_type ASC");
 while ($row = $result->fetch_assoc()) $data[] = $row;
 echo json_encode($data);
-$conn->close();
+

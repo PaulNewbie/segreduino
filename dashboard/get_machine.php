@@ -13,5 +13,5 @@ if ($res && $res->num_rows > 0) {
 } else {
   echo json_encode(["success" => false, "message" => "Machine not found"]);
 }
-$conn->close();
+
 ?>

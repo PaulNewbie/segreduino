@@ -23,5 +23,5 @@ if ($stmt->execute()) {
     echo "Insert failed";
 }
 $stmt->close();
-$conn->close();
+
 ?>

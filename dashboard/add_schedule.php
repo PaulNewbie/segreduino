@@ -30,13 +30,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($stmt->execute()) {
         $stmt->close();
-        $conn->close();
+        
         header("Location: index.php?success=schedule_added");
         exit;
     } else {
         echo "Error inserting schedule: " . $stmt->error;
         $stmt->close();
-        $conn->close();
+        
         exit;
     }
 } else {

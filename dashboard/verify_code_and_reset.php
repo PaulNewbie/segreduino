@@ -40,4 +40,3 @@ if ($stmt->execute()) {
 } else {
     echo json_encode(['success' => false, 'message' => 'Failed to update password.']);
 }
-$conn->close();

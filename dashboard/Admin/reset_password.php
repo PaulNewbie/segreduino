@@ -49,7 +49,7 @@ if (isset($_POST['new_password'], $_POST['confirm_password'])) {
     }
 }
 
-$conn->close();
+
 ?>
 
 <!DOCTYPE html>

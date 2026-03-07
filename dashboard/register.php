@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($stmt->execute()) {
                 $stmt->close();
-                $conn->close();
+                
                 // Redirect to login page after successful registration
                 header("Location: login.php");
                 exit;
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-$conn->close();
+
 ?>
 
 <!DOCTYPE html>

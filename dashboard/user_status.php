@@ -28,7 +28,7 @@ if (isset($_GET['user_id'])) {
         $stmt->fetch();
     }
     $stmt->close();
-    $conn->close();
+    
 
     if ($status !== null) {
         echo (strtolower($status) === 'active') ? 'active' : 'inactive';

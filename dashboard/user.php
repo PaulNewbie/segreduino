@@ -181,7 +181,7 @@ if ($result && $result->num_rows > 0) {
     echo '<tr><td colspan="4">No admin found</td></tr>';
 }
 
-          $conn->close();
+          
           ?>
         </tbody>
       </table>
@@ -225,7 +225,7 @@ if ($conn->connect_error) {
           } else {
               echo '<tr><td colspan="4">No staff found</td></tr>';
           }
-          $conn->close();
+          
           ?>
         </tbody>
       </table>
@@ -285,7 +285,7 @@ if ($conn->connect_error) {
           echo "<tr><td colspan='5'>No login history found</td></tr>";
       }
 
-      $conn->close();
+      
       ?>
     </tbody>
   </table>

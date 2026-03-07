@@ -207,7 +207,7 @@ if ($conn->connect_error) {
           } else {
               echo "<tr><td colspan='4'>No records found.</td></tr>";
           }
-          $conn->close();
+          
           ?>
         </tbody>
       </table>

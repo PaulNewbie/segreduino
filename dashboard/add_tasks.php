@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "Something went wrong while saving the task.";
     }
     $stmt->close();
-    $conn->close();
+    
 } else {
     echo "Invalid request.";
 }

@@ -83,7 +83,7 @@ if ($result) {
 }
 
 // close connection once everything is done
-$conn->close();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -411,7 +411,7 @@ if ($result && $result->num_rows > 0) {
 } else {
     echo '<tr><td colspan="5">No schedule found</td></tr>';
 }
-$conn->close();
+
 ?>
             </tbody>
           </table>
@@ -439,7 +439,7 @@ $conn->close();
                         echo '<option value="' . htmlspecialchars($row["user_id"]) . '">' . htmlspecialchars($row["full_name"]) . '</option>';
                     }
                 }
-                $conn->close();
+                
                 ?>
               </select>
               <input type="text" name="floor_level" placeholder="Floor Level" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
@@ -493,7 +493,7 @@ if ($result && $result->num_rows > 0) {
 } else {
     echo '<tr><td colspan="6">No tasks found</td></tr>';
 }
-$conn->close();
+
 ?>
             </tbody>
           </table>
@@ -521,7 +521,7 @@ $conn->close();
                 while ($row = $result->fetch_assoc()) {
                   echo '<option value="' . htmlspecialchars($row['user_id']) . '">' . htmlspecialchars($row['full_name']) . '</option>';
                 }
-                $conn->close();
+                
                 ?>
               </select>
             </div>

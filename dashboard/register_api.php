@@ -42,7 +42,7 @@ $stmt->store_result();
 if ($stmt->num_rows > 0) {
     echo json_encode(['success' => false, 'message' => 'Username or email already exists']);
     $stmt->close();
-    $conn->close();
+    
     exit;
 }
 $stmt->close();
@@ -63,5 +63,5 @@ if ($stmt->execute()) {
 }
 
 $stmt->close();
-$conn->close();
+
 ?>

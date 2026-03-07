@@ -72,5 +72,5 @@ $upd->close();
 }
 
 $stmt->close();
-$conn->close();
+
 ?>

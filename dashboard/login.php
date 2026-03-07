@@ -36,7 +36,7 @@ if (isset($_POST['username'], $_POST['password'])) {
     }
 
     $stmt->close();
-    $conn->close();
+    
 }
 ?>
 <!DOCTYPE html>
