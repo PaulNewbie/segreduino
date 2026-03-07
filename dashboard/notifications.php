@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 
-$conn = new mysqli("localhost", "root", "", "smart_waste_management.sql");
+require_once __DIR__ . "/config.php";
 
 if ($conn->connect_error) {
     die(json_encode(['error' => 'Connection failed']));

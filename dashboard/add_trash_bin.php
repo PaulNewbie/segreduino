@@ -1,5 +1,5 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "smart_waste_management");
+require_once __DIR__ . "/config.php";
 if ($conn->connect_error) {
     http_response_code(500);
     echo "Database connection failed";

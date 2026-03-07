@@ -8,7 +8,7 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Database connection
-$conn = new mysqli("localhost", "root", "", "smart_waste_management");
+require_once __DIR__ . "/config.php";
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }

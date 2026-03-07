@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $conn = new mysqli("localhost", "root", "", "smart_waste_management");
+    require_once __DIR__ . "/config.php";
     if ($conn->connect_error) {
         echo "DB connection error";
         exit;

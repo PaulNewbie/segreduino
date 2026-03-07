@@ -9,7 +9,7 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Fetch bin status and last emptied for each type
-$conn = new mysqli("localhost", "u303252282_root", "Forall.24", "u303252282_smart_waste");
+require_once __DIR__ . "/config.php";
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -72,19 +72,17 @@ foreach ($bin_types as $type) {
     }
     $stmt->close();
 }
-$conn->close();
 
+// Use the same open connection to load kiosks instead of reconnecting
 $kiosks = [];
-$conn = new mysqli("localhost", "u303252282_root", "Forall.24", "u303252282_smart_waste");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 $result = $conn->query("SELECT machine_id, machine_name FROM machines ORDER BY machine_name ASC");
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $kiosks[] = $row;
     }
 }
+
+// close connection once everything is done
 $conn->close();
 ?>
 <!DOCTYPE html>
@@ -374,7 +372,7 @@ $conn->close();
             </thead>
             <tbody>
 <?php
-$conn = new mysqli("localhost", "u303252282_root", "Forall.24", "u303252282_smart_waste");
+require_once __DIR__ . "/config.php";
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -430,7 +428,7 @@ $conn->close();
               <select name="user_id" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
                 <option value="">Select User</option>
                 <?php
-                $conn = new mysqli("localhost", "u303252282_root", "Forall.24", "u303252282_smart_waste");
+                require_once __DIR__ . "/config.php";
                 if ($conn->connect_error) {
                     die("Connection failed: " . $conn->connect_error);
                 }
@@ -472,7 +470,7 @@ $conn->close();
             </thead>
             <tbody>
 <?php
-$conn = new mysqli("localhost", "u303252282_root", "Forall.24", "u303252282_smart_waste");
+require_once __DIR__ . "/config.php";
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -515,7 +513,7 @@ $conn->close();
               <select id="user_id" name="user_id" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #ccc; margin-top: 6px;">
                 <option value="">-- Select User --</option>
                 <?php
-                $conn = new mysqli("localhost", "u303252282_root", "Forall.24", "u303252282_smart_waste");
+                require_once __DIR__ . "/config.php";
                 if ($conn->connect_error) {
                   die("Connection failed: " . $conn->connect_error);
                 }

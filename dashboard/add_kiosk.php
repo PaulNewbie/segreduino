@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-$conn = new mysqli("localhost", "u303252282_root", "Forall.24", "u303252282_smart_waste");
+require_once __DIR__ . "/config.php";
 
 if ($conn->connect_error) {
     die(json_encode(["success" => false, "message" => "Database connection failed."]));

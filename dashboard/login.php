@@ -5,31 +5,34 @@ $success = '';
 
 // Handle login form
 if (isset($_POST['username'], $_POST['password'])) {
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
+    $input_username = trim($_POST['username']);
+    $input_email = $input_username; // Fix for the bind_param bug
+    $input_password = trim($_POST['password']);
 
-    $conn = new mysqli("localhost", "u303252282_root", "Forall.24", "u303252282_smart_waste");
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
+    // Import the database connection
+    require_once __DIR__ . "/config.php";
 
- $stmt = $conn->prepare("SELECT id, username, password FROM admin_users WHERE username = ? OR email = ? LIMIT 1");
-$stmt->bind_param("ss", $username, $username);
-$stmt->execute();
-$result = $stmt->get_result();
+    $stmt = $conn->prepare("SELECT id, username, password FROM admin_users WHERE username = ? OR email = ? LIMIT 1");
+    // Use two separate variables here to prevent PHP reference bugs
+    $stmt->bind_param("ss", $input_username, $input_email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if ($result->num_rows === 1) {
+    if ($result && $result->num_rows === 1) {
         $user = $result->fetch_assoc();
-        // Match password (assuming hashed passwords)
-        if (password_verify($password, $user['password'])) {
+        
+        // Match password
+        if (password_verify($input_password, $user['password'])) {
             $_SESSION['username'] = $user['username'];
             header('Location: index.php');
             exit;
         } else {
-            $error = 'Invalid username or password.';
+            // DEBUG: Shows if password verify failed
+            $error = 'DEBUG: Password incorrect. Hash in DB starts with: ' . substr($user['password'], 0, 10) . '...';
         }
     } else {
-        $error = 'Invalid username or password.';
+        // DEBUG: Shows if it couldn't find the username/email
+        $error = 'DEBUG: Username/Email not found in the admin_users table.';
     }
 
     $stmt->close();

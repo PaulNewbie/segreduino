@@ -4,7 +4,7 @@
 if (isset($_GET['user_id'])) {
     $user_id = intval($_GET['user_id']);
 
-    $conn = new mysqli("localhost", "u303252282_root", "Forall.24", "u303252282_smart_waste");
+    require_once __DIR__ . "/config.php";
     if ($conn->connect_error) {
         http_response_code(500);
         echo "db_error";
