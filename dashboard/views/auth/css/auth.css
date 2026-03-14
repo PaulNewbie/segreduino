@@ -1,0 +1,183 @@
+/* views/auth/css/auth.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+body {
+    /* Using an absolute path to ensure the background loads from any URL */
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                url('/assets/img/PDM-Facade.png'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.auth-container {
+    background: rgba(28, 31, 38, 0.25);
+    padding: 60px 50px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 480px;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-sizing: border-box;
+}
+
+.auth-container .brand {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1abc3a;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auth-container .brand .bx {
+    font-size: 36px;
+}
+
+.auth-container h2 {
+    font-size: 24px;
+    margin-bottom: 24px;
+    font-weight: 600;
+    color: #FBFBFB;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auth-container form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.input-icon-group {
+    position: relative;
+    width: 100%;
+}
+
+.input-icon-group i:not(.show-hide-icon) {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #00ff44;
+    opacity: 0.9;
+    z-index: 2;
+}
+
+.input-icon-group input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #ffffff;
+    padding: 14px 18px 14px 45px; /* Extra left padding for the icon */
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.input-icon-group input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.input-icon-group input:focus {
+    border-color: #00ff44;
+    outline: none;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.show-hide-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00ff44;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    z-index: 2;
+    transition: opacity 0.2s;
+}
+
+.show-hide-icon:hover {
+    opacity: 1;
+}
+
+.auth-container button {
+    background: #1abc3a;
+    color: #fff;
+    border: none;
+    padding: 14px 0;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.auth-container button:hover {
+    background: #169c2f;
+    transform: translateY(-2px);
+}
+
+.alert {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.alert.error {
+    background: rgba(219, 80, 74, 0.2);
+    color: #ff6b6b;
+    border: 1px solid rgba(219, 80, 74, 0.3);
+}
+
+.alert.success {
+    background: rgba(26, 188, 58, 0.2);
+    color: #00ff44;
+    border: 1px solid rgba(26, 188, 58, 0.3);
+}
+
+.auth-link {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #00ff44;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.auth-link:hover {
+    color: #00cc36;
+    text-decoration: underline;
+}

@@ -33,14 +33,6 @@
         <img src="/assets/img/pdm logo.jfif" alt="profile" />
       </a>
     </nav>
-    ```
-
----
-
-### 4. `views/layouts/footer.php`
-Closes out the layout smoothly.
-
-```php
 </section> <script src="/assets/js/script.js"></script>
   
   <?php if (isset($extra_js)) echo $extra_js; ?>
