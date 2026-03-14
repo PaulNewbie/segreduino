@@ -1,0 +1,107 @@
+/* assets/css/dashboard.css */
+.bin-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  justify-content: flex-start;
+  margin-bottom: 32px;
+}
+.bin-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  padding: 20px 24px;
+  min-width: 220px;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.chart-container {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 12px;
+}
+@media (max-width: 900px) {
+  .bin-grid {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .bin-card {
+    min-width: unset;
+    width: 100%;
+  }
+}
+.progress-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(var(--color) var(--value), #e6e6e6 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: var(--color);
+  margin-bottom: 12px;
+  transition: background 0.5s ease, color 0.3s ease;
+  position: relative;
+}
+.table-data .order table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table-data .order th, .table-data .order td {
+  padding: 12px 10px;
+  text-align: left;
+  vertical-align: middle;
+  font-size: 16px;
+}
+.table-data .order th:nth-child(1), .table-data .order td:nth-child(1) { min-width: 140px; width: 18%; }
+.table-data .order th:nth-child(2), .table-data .order td:nth-child(2) { min-width: 100px; width: 12%; }
+.table-data .order th:nth-child(3), .table-data .order td:nth-child(3) { min-width: 180px; width: 28%; }
+.table-data .order th:nth-child(4), .table-data .order td:nth-child(4) { min-width: 120px; width: 18%; }
+.table-data .order th:nth-child(5), .table-data .order td:nth-child(5) { min-width: 140px; width: 24%; }
+.table-data .order th {
+  background: var(--light-green);
+  color: green;
+  font-weight: 600;
+}
+.table-data .order tr { border-bottom: 1px solid #222; }
+.table-data .order tr:last-child td { border-bottom: none; }
+.schedule-dropdown {
+  display: none;
+  position: absolute;
+  background: #232825;
+  color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  padding: 8px 0;
+  z-index: 1000;
+  min-width: 220px;
+  right: 32px;
+  top: 48px;
+  font-family: inherit;
+  border: 1px solid #222;
+  animation: fadeIn 0.18s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px);}
+  to   { opacity: 1; transform: translateY(0);}
+}
+.schedule-filter-btn {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: white;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.schedule-filter-btn:hover { background: #f0f0f0; }
+.schedule-filter-btn.active-filter {
+  background: #4CAF50;
+  color: white;
+  font-weight: bold;
+}
