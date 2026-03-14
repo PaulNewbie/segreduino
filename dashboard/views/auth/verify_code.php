@@ -12,7 +12,7 @@ if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 // Kung walang reset_email sa session, ibalik sa forgot_password.php
 if (!isset($_SESSION['reset_email'])) {
-    header("Location: forgot_password.php");
+    header("Location: /forgot_password.php");
     exit;
 }
 
@@ -36,7 +36,7 @@ if (isset($_POST['verification_code'])) {
         } else {
             $_SESSION['reset_user_id'] = $user['id'];
             // Success → go to reset password page
-            header('Location: reset_password.php');
+            header('Location: /reset_password.php');
             exit;
         }
     } else {
@@ -113,7 +113,9 @@ button:hover { background: #169c2f; }
         <button type="submit"><i class="bx bx-log-in" style="vertical-align:middle;margin-right:4px;"></i>Verify</button>
     </form>
 
-    <a href="forgot_password.php" class="register-link"><i class="bx bx-arrow-back" style="vertical-align:middle;margin-right:4px;"></i>Back to Forgot Password</a>
+    <a href="/forgot-password.php" class="register-link"><i class="bx bx-arrow-back" style="vertical-align:middle;margin-right:4px;"></i>Back to Forgot Password</a>
 </div>
 </body>
 </html>
+
+

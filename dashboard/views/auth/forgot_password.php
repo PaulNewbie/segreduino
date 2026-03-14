@@ -62,7 +62,7 @@ if (isset($_POST['forgot_email'])) {
 
                 $mail->send();
                 $_SESSION['reset_email'] = $email;
-                header("Location: /views/auth/verify_code.php"); // Adjust to your router logic if needed
+                header("Location: /verify-code.php"); 
                 exit;
 
             } catch (Exception $e) {

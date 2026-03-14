@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 session_start();
 
 if (!isset($_SESSION['reset_user_id'])) {
-    header('Location: forgot_password.php');
+    header('Location: /forgot_password.php');
     exit;
 }
 
@@ -41,7 +41,7 @@ if (isset($_POST['new_password'], $_POST['confirm_password'])) {
         if ($stmt->execute()) {
             unset($_SESSION['reset_user_id'], $_SESSION['reset_email']);
             $success = '✅ Password successfully updated! Redirecting to login...';
-            header("Refresh:3; url=../login.php");
+            header("Refresh:3; url=/login.php");
         } else {
             $error = 'Failed to update password: ' . $stmt->error;
         }
@@ -237,7 +237,7 @@ button:hover { background: #169c2f; }
         <button type="submit"><i class="bx bx-check-circle" style="margin-right:6px;"></i>Reset Password</button>
     </form>
 
-    <a href="../login.php" class="register-link"><i class="bx bx-log-in" style="margin-right:4px;"></i>Back to Login</a>
+    <a href="/login.php" class="register-link"><i class="bx bx-log-in" style="margin-right:4px;"></i>Back to Login</a>
 </div>
 
 <script>
