@@ -1,5 +1,4 @@
 <?php
-session_start();
 header('Content-Type: application/json');
 date_default_timezone_set('Asia/Manila');
 
@@ -9,12 +8,13 @@ if ($conn->connect_error) {
     exit;
 }
 
+// CHANGED: LEFT JOIN users u ON t.user_id = u.user_id (Was t.staff_id)
 $sql = "SELECT n.id, n.message, n.type, n.status, n.created_at,
                t.task_description,
                u.full_name AS staff_name
         FROM notifications n
         LEFT JOIN tasks t ON n.task_id = t.id
-        LEFT JOIN users u ON t.staff_id = u.user_id
+        LEFT JOIN users u ON t.user_id = u.user_id 
         WHERE n.status = 'unread'
         ORDER BY n.created_at DESC
         LIMIT 10";
@@ -56,4 +56,3 @@ if ($result && $result->num_rows > 0) {
 }
 
 echo json_encode(['success'=>true,'count'=>count($notifications),'data'=>$notifications]);
-

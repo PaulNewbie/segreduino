@@ -28,14 +28,10 @@
       <a href="#" class="notification">
         <i class="bx bxs-bell"></i>
         <span class="num">0</span>
+        <div class="notification-dropdown"></div>
       </a>
       <a href="#" class="profile">
         <img src="/assets/img/pdm logo.jfif" alt="profile" />
       </a>
     </nav>
-</section> <script src="/assets/js/script.js"></script>
-  
-  <?php if (isset($extra_js)) echo $extra_js; ?>
-
-</body>
-</html>
+    

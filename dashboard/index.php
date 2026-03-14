@@ -19,6 +19,17 @@ if ($request === '/' || $request === '/index.php') {
     $request = '/dashboard.php';
 }
 
+// =========================================================
+// Allow direct access to the controllers folder
+// =========================================================
+if (strpos($request, '/controllers/') === 0) {
+    $file_path = __DIR__ . $request;
+    if (file_exists($file_path)) {
+        require $file_path;
+        exit; // Stop the router here so it doesn't hit the 404 below
+    }
+}
+
 switch ($request) {
     // MAIN PAGES
     case '/dashboard.php':

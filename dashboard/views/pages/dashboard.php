@@ -12,7 +12,7 @@ if ($conn->connect_error) {
 }
 
 // ---------------------------------------------------------
-// DATA FETCHING LOGIC (Kept exactly as you had it)
+// DATA FETCHING LOGIC 
 // ---------------------------------------------------------
 $bin_types = [];
 $where = "";
@@ -59,6 +59,15 @@ $result = $conn->query("SELECT machine_id, machine_name FROM machines ORDER BY m
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $kiosks[] = $row;
+    }
+}
+
+// Fetch Users for the dropdowns (to avoid repeating the query twice)
+$users = [];
+$userResult = $conn->query("SELECT user_id, full_name FROM users ORDER BY full_name ASC");
+if ($userResult && $userResult->num_rows > 0) {
+    while($row = $userResult->fetch_assoc()) {
+        $users[] = $row;
     }
 }
 
@@ -167,11 +176,8 @@ require_once __DIR__ . '/../layouts/header.php';
             <select name="user_id" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
               <option value="">Select User</option>
               <?php
-              $result = $conn->query("SELECT user_id, full_name FROM users ORDER BY full_name ASC");
-              if ($result && $result->num_rows > 0) {
-                  while($row = $result->fetch_assoc()) {
-                      echo '<option value="' . htmlspecialchars($row["user_id"]) . '">' . htmlspecialchars($row["full_name"]) . '</option>';
-                  }
+              foreach($users as $user) {
+                  echo '<option value="' . htmlspecialchars($user["user_id"]) . '">' . htmlspecialchars($user["full_name"]) . '</option>';
               }
               ?>
             </select>
@@ -183,6 +189,82 @@ require_once __DIR__ . '/../layouts/header.php';
         </form>
       </div>
     </div>
+    
+    <div class="table-data">
+        <div class="order">
+          <div class="head">
+            <h3>Task</h3>
+            <i class="bx bx-search"></i>
+            <i class="bx bx-filter"></i>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Bin ID</th>
+                <th>Machine ID</th>
+                <th>Task Description</th>
+                <th>Status</th>
+                <th>Created At</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+              $sql = "SELECT users.full_name, tasks.bin_id, tasks.machine_id, tasks.task_description, tasks.task_status, tasks.created_at FROM tasks JOIN users ON tasks.user_id = users.user_id ORDER BY tasks.created_at DESC";
+              $result = $conn->query($sql);
+              if ($result && $result->num_rows > 0) {
+                  while ($row = $result->fetch_assoc()) {
+                      echo '<tr>';
+                      echo '<td>' . htmlspecialchars($row["full_name"]) . '</td>';
+                      echo '<td>' . htmlspecialchars($row["bin_id"]) . '</td>';
+                      echo '<td>' . htmlspecialchars($row["machine_id"]) . '</td>';
+                      echo '<td>' . htmlspecialchars($row["task_description"]) . '</td>';
+                      echo '<td>' . htmlspecialchars($row["task_status"]) . '</td>';
+                      echo '<td>' . htmlspecialchars($row["created_at"]) . '</td>';
+                      echo '</tr>';
+                  }
+              } else {
+                  echo '<tr><td colspan="6">No tasks found</td></tr>';
+              }
+              ?>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="todo">
+          <div class="head" style="display: flex; align-items: center; justify-content: space-between;">
+            <h3>Add Tasks</h3>
+            <div>
+              <i class="bx bx-plus" id="addTaskBtn" style="cursor:pointer;"></i>
+              <i class="bx bx-filter" style="color: white;"></i>
+            </div>
+          </div>
+          <form id="addTasksForm" method="post" action="/controllers/Actions/add_tasks.php" style="display:none; background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.07); padding:24px; max-width:400px; margin-top:16px;">
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <select name="user_id" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
+                <option value="">-- Select User --</option>
+                <?php
+                foreach($users as $user) {
+                    echo '<option value="' . htmlspecialchars($user['user_id']) . '">' . htmlspecialchars($user['full_name']) . '</option>';
+                }
+                ?>
+              </select>
+              <input type="text" id="bin_id" name="bin_id" placeholder="Bin ID" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
+              <input type="text" id="machine_id" name="machine_id" placeholder="Machine ID" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
+              <textarea id="task_description" name="task_description" rows="3" placeholder="Task Description" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px; font-family: inherit;"></textarea>
+              <select id="status" name="status" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
+                <option value="Select">-- Select Status --</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Done">Done</option>
+              </select>
+              <input type="datetime-local" id="created_at" name="created_at" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
+              <button type="submit" style="background:green; color:#fff; border:none; border-radius:8px; padding:12px; font-size:16px; cursor:pointer;">Add Task</button>
+            </div>
+          </form>
+        </div>
+    </div>
+    
   </div>
 </main>
 
@@ -200,6 +282,13 @@ document.addEventListener('DOMContentLoaded', function() {
   if (addScheduleBtn && addScheduleForm) {
     addScheduleBtn.onclick = () => { addScheduleForm.style.display = (addScheduleForm.style.display === 'none' || addScheduleForm.style.display === '') ? 'block' : 'none'; };
   }
+  
+  // Toggle Add Tasks form (RESTORED)
+  const addTaskBtn = document.getElementById('addTaskBtn');
+  const addTasksForm = document.getElementById('addTasksForm');
+  if (addTaskBtn && addTasksForm) {
+    addTaskBtn.onclick = () => { addTasksForm.style.display = (addTasksForm.style.display === 'none' || addTasksForm.style.display === '') ? 'block' : 'none'; };
+  }
 
   // Dropdown UI Logic
   const scheduleDropdownBtn = document.getElementById('scheduleDropdownBtn');
@@ -214,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Live Bin Data Update
   async function fetchLiveBinData() {
     try {
-      const response = await fetch("/controllers/Api/fetch_bin_status.php"); // Updated path
+      const response = await fetch("/controllers/Api/fetch_bin_status.php");
       const bins = await response.json();
       bins.forEach(bin => {
         const { bin_type, bin_status, last_updated } = bin;
