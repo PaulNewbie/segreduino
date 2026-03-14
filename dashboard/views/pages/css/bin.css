@@ -1,0 +1,118 @@
+/* views/pages/css/bin.css */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--light);
+  margin: 0;
+  padding: 0;
+  color: var(--dark);
+  transition: background 0.3s, color 0.3s;
+}
+main {
+  padding: 20px;
+}
+.card-custom {
+  background: var(--grey);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  margin-top: 20px;
+  transition: background 0.3s;
+}
+.head-title h1 {
+  font-size: 28px;
+  color: var(--blue);
+  transition: color 0.3s;
+}
+.breadcrumb {
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  margin-top: 10px;
+  color: var(--dark-grey);
+}
+.breadcrumb li a.active {
+  font-weight: bold;
+  color: var(--blue);
+}
+.bin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 25px;
+  background: var(--light);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.bin-table th, .bin-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--grey);
+  vertical-align: middle;
+  transition: background 0.3s, color 0.3s;
+}
+.bin-table th {
+  background-color: var(--light-green);
+  color: green;
+  font-weight: 600;
+  font-size: 16px;
+}
+.bin-table tr:hover {
+  background-color: inherit;
+}
+.empty-btn {
+  background-color: #27ae60;
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.3s;
+}
+.empty-btn:hover {
+  background-color: var(--red);
+}
+.level-bar {
+  background: var(--grey);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 18px;
+  width: 120px;
+  margin-right: 8px;
+  display: inline-block;
+  vertical-align: middle;
+  transition: background 0.3s;
+}
+.level-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.4s;
+}
+.level-fill.green { background: #27ae60; }
+.level-fill.yellow { background: #f1c40f; }
+.level-fill.red { background: #e74c3c; }
+.bin-type-icon {
+  font-size: 22px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.waste-icon {
+  font-size: 20px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+#customBinType { 
+  display:none; margin-top:6px; width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; 
+}
+
+@media (max-width: 900px) {
+  main { padding: 10px; }
+  .card-custom { padding: 10px; }
+  .bin-table th, .bin-table td { padding: 8px 6px; font-size: 14px; }
+  .level-bar { width: 80px; height: 12px; }
+}

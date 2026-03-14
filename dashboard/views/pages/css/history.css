@@ -1,0 +1,83 @@
+/* views/pages/css/history.css */
+main {
+  padding: 20px;
+}
+.card-custom {
+  background: var(--grey);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  margin-top: 20px;
+  transition: background 0.3s;
+}
+.card-custom h2 {
+  margin-bottom: 20px;
+  color: black;
+}
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 25px;
+}
+.log-table th, .log-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+.log-table th {
+  background-color: var(--light-green);
+  color: green;
+  font-weight: 600;
+}
+.log-table tr:hover {
+  background-color: inherit;
+}
+.export-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+.export-buttons button {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: 500;
+}
+.export-buttons button:hover {
+  background-color: #27ae60;
+}
+.chart-section {
+  margin-top: 30px;
+}
+.head-title h1 {
+  font-size: 28px;
+  color: #2c3e50;
+}
+.breadcrumb {
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  margin-top: 10px;
+  color: #888;
+}
+.breadcrumb li a.active {
+  font-weight: bold;
+  color: #3498db;
+}
+@media (max-width: 900px) {
+  main {
+    padding: 10px;
+  }
+  .card-custom {
+    padding: 10px;
+  }
+  .log-table th, .log-table td {
+    padding: 8px 6px;
+    font-size: 14px;
+  }
+}
