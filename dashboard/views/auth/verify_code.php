@@ -36,7 +36,7 @@ if (isset($_POST['verification_code'])) {
         } else {
             $_SESSION['reset_user_id'] = $user['id'];
             // Success → go to reset password page
-            header('Location: /reset_password.php');
+            header('Location: /reset-password.php');
             exit;
         }
     } else {

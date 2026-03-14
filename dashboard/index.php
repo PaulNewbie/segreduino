@@ -40,7 +40,7 @@ switch ($request) {
     case '/forgot-password.php':
         require __DIR__ . '/views/auth/forgot_password.php';
         break;
-
+        
     case '/verify-code.php':
         require __DIR__ . '/views/auth/verify_code.php';
         break;
