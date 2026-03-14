@@ -245,7 +245,7 @@ if ($result) {
     </a>
     <ul class="side-menu top">
       <li>
-        <a href="index.php" id="dashboard-link">
+        <a href="dashboard.php" id="dashboard-link">
           <i class="bx bxs-dashboard"></i>
           <span class="text">Dashboard</span>
         </a>
@@ -310,7 +310,7 @@ if ($result) {
           <ul class="breadcrumb">
             <li></li>
             <li><i class="bx bx-chevron-right"></i></li>
-            <li><a class="active" href="index.php">Home</a></li>
+            <li><a class="active" href="dashboard.php">Home</a></li>
           </ul>
         </div>
       </div>

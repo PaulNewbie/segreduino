@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($stmt->execute()) {
         $stmt->close();
         
-        header("Location: index.php?success=schedule_added");
+        header("Location: /dashboard.php?success=schedule_added");
         exit;
     } else {
         echo "Error inserting schedule: " . $stmt->error;
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 } else {
     // Not a POST request
-    header("Location: index.php");
+    header("Location: dashboard.php");
     exit;
 }
 ?>

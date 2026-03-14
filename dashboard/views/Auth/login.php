@@ -24,7 +24,7 @@ if (isset($_POST['username'], $_POST['password'])) {
         // Match password
         if (password_verify($input_password, $user['password'])) {
             $_SESSION['username'] = $user['username'];
-            header('Location: index.php');
+            header('Location: dashboard.php');
             exit;
         } else {
             // DEBUG: Shows if password verify failed

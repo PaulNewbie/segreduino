@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("iiisss", $user_id, $bin_id, $machine_id, $task_description, $task_status, $created_at);
 
     if ($stmt->execute()) {
-        header("Location: index.php?status=success");
+        header("Location: /dashboard.php?status=success");
         exit;
     } else {
         error_log("Insert Error: " . $stmt->error);

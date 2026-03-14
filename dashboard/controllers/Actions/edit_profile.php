@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($stmt->execute()) {
             $_SESSION['username'] = $newUsername;
             $message = "Profile updated successfully!";
-            header("Refresh:2; url=index.php");
+            header("Refresh:2; url=dashboard.php");
         } else {
             $message = "Error updating profile: " . $conn->error;
             error_log("Database error: " . $conn->error);
@@ -196,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
 
                     <div class="button-group">
-                        <a href="index.php" class="cancel-btn">Cancel</a>
+                        <a href="dashboard.php" class="cancel-btn">Cancel</a>
                         <button type="submit" class="submit-btn">Save Changes</button>
                     </div>
                 </form>

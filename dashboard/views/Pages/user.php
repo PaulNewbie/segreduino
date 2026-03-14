@@ -75,7 +75,7 @@ $_SESSION['username'] = 'Admin User';
     </a>
     <ul class="side-menu top">
       <li>
-        <a href="index.php" id="dashboard-link">
+        <a href="dashboard.php" id="dashboard-link">
           <i class="bx bxs-dashboard"></i>
           <span class="text">Dashboard</span>
         </a>
