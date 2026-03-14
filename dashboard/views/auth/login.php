@@ -1,6 +1,7 @@
 <?php
 // views/auth/login.php
-session_start();
+
+// 1. Initialize variables at the top to prevent "Undefined variable" warnings
 $error = '';
 $success = '';
 
@@ -49,10 +50,10 @@ if (isset($_POST['username'], $_POST['password'])) {
     <div class="brand"><i class="bx bxs-chip"></i> SegreDuino</div>
     <h2><i class="bx bxs-lock-alt"></i>Admin Login</h2>
     
-    <?php if ($error): ?>
+    <?php if (!empty($error)): ?>
       <div class="alert error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
-    <?php if ($success): ?>
+    <?php if (!empty($success)): ?>
       <div class="alert success"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
 

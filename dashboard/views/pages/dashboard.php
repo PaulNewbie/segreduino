@@ -1,9 +1,8 @@
 <?php
 // views/pages/dashboard.php
-session_start();
 
 if (!isset($_SESSION['username'])) {
-    header('.php');
+    header("Location: /login.php");
     exit;
 }
 

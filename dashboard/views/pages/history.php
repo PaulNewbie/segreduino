@@ -1,6 +1,5 @@
 <?php
 // views/pages/history.php
-session_start();
 
 // Connect to Database once at the top
 require_once __DIR__ . '/../../config/config.php';

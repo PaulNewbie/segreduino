@@ -1,6 +1,5 @@
 <?php
 // views/pages/user.php
-session_start();
 
 // Redirect if not logged in
 if (!isset($_SESSION['username'])) {
