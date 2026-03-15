@@ -48,8 +48,8 @@ require_once __DIR__ . '/../layouts/header.php';
         if ($result && $result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
                 echo "<tr>";
-                echo "<td>" . htmlspecialchars($row['machine_name']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['location']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>";
+                echo "<td>" . htmlspecialchars($row['location'] ?? '') . "</td>";
                 echo "<td style='display:flex; gap:8px;'>";
                 echo "<button class='empty-btn' style='background:#27ae60; padding:4px 10px; font-size:14px;' onclick='editKiosk(".$row['machine_id'].")'>Edit</button>";
                 echo "<button class='empty-btn' style='background:#e74c3c; padding:4px 10px; font-size:14px;' onclick='deleteKiosk(".$row['machine_id'].")'>Delete</button>";
@@ -95,10 +95,10 @@ require_once __DIR__ . '/../layouts/header.php';
         if ($result && $result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
                 echo "<tr>";
-                echo "<td>" . htmlspecialchars($row['machine_name']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['floor_level']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['last_updated']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['bin_type']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>";
+                echo "<td>" . htmlspecialchars($row['floor_level'] ?? '') . "</td>";
+                echo "<td>" . htmlspecialchars($row['last_updated'] ?? '') . "</td>";
+                echo "<td>" . htmlspecialchars($row['bin_type'] ?? '') . "</td>";
                 echo '<td style="display:flex; justify-content:center; gap:6px;">
                         <button class="empty-btn" style="padding:6px 12px; font-size:14px;" onclick="editTrashBin(' . $row['bin_id'] . ')">
                             <i class="bx bx-edit"></i> Edit
