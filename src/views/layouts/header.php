@@ -58,8 +58,8 @@
         <img src="/assets/img/pdm logo.jfif" alt="profile" id="profileIcon" />
         
         <ul class="profile-dropdown" id="profileDropdown">
-            <li><a href="#"><i class='bx bx-user'></i> My Profile</a></li>
-            <li><a href="#"><i class='bx bx-cog'></i> Settings</a></li>
+            <li><a href="/profile.php"><i class='bx bx-user'></i> My Profile</a></li>
+            <li><a href="/settings.php"><i class='bx bx-cog'></i> Settings</a></li>
             <li><hr></li>
             <li><a href="/logout.php" class="logout-btn"><i class='bx bx-log-out'></i> Logout</a></li>
         </ul>

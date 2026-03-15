@@ -53,6 +53,12 @@ switch ($request) {
     case '/tasks.php':
         require __DIR__ . '/src/views/pages/tasks.php';
         break;
+    case '/profile.php':
+        require __DIR__ . '/src/views/pages/profile.php';
+        break;
+    case '/settings.php':
+        require __DIR__ . '/src/views/pages/settings.php';
+        break;
 
     // AUTH PAGES
     case '/login.php':
