@@ -1,118 +1,111 @@
-/* views/pages/css/bin.css */
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: var(--light);
-  margin: 0;
-  padding: 0;
-  color: var(--dark);
-  transition: background 0.3s, color 0.3s;
-}
-main {
-  padding: 20px;
-}
-.card-custom {
-  background: var(--grey);
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-  margin-top: 20px;
-  transition: background 0.3s;
-}
-.head-title h1 {
-  font-size: 28px;
-  color: var(--blue);
-  transition: color 0.3s;
-}
-.breadcrumb {
-  list-style: none;
-  display: flex;
-  gap: 8px;
-  padding: 0;
-  margin-top: 10px;
-  color: var(--dark-grey);
-}
-.breadcrumb li a.active {
-  font-weight: bold;
-  color: var(--blue);
-}
-.bin-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 25px;
-  background: var(--light);
-  border-radius: 10px;
-  overflow: hidden;
-  transition: background 0.3s;
-}
-.bin-table th, .bin-table td {
-  padding: 14px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--grey);
-  vertical-align: middle;
-  transition: background 0.3s, color 0.3s;
-}
-.bin-table th {
-  background-color: var(--light-green);
-  color: green;
-  font-weight: 600;
-  font-size: 16px;
-}
-.bin-table tr:hover {
-  background-color: inherit;
-}
-.empty-btn {
-  background-color: #27ae60;
-  color: #ffffff;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: background-color 0.3s;
-}
-.empty-btn:hover {
-  background-color: var(--red);
-}
-.level-bar {
-  background: var(--grey);
-  border-radius: 8px;
-  overflow: hidden;
-  height: 18px;
-  width: 120px;
-  margin-right: 8px;
-  display: inline-block;
-  vertical-align: middle;
-  transition: background 0.3s;
-}
-.level-fill {
-  height: 100%;
-  border-radius: 8px;
-  transition: width 0.4s;
-}
-.level-fill.green { background: #27ae60; }
-.level-fill.yellow { background: #f1c40f; }
-.level-fill.red { background: #e74c3c; }
-.bin-type-icon {
-  font-size: 22px;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-.waste-icon {
-  font-size: 20px;
-  vertical-align: middle;
-  margin-right: 4px;
-}
-#customBinType { 
-  display:none; margin-top:6px; width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; 
+/* assets/css/pages/bin.css */
+
+/* Top Controls */
+.top-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 24px;
 }
 
-@media (max-width: 900px) {
-  main { padding: 10px; }
-  .card-custom { padding: 10px; }
-  .bin-table th, .bin-table td { padding: 8px 6px; font-size: 14px; }
-  .level-bar { width: 80px; height: 12px; }
+/* Kiosk Card Layout */
+.kiosk-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
+.kiosk-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    padding: 24px;
+    border: 1px solid #f0f0f0;
+}
+.kiosk-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.kiosk-title h2 { margin: 0 0 4px 0; font-size: 22px; color: #2c3e50; }
+.kiosk-title p { margin: 0; font-size: 14px; color: #666; font-weight: 500; }
+.kiosk-actions { display: flex; gap: 8px; }
+
+/* Bins Grid inside Kiosk */
+.bins-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+}
+.bin-item {
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.bin-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+/* Circular Progress */
+.progress-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(var(--color) var(--value), #e6e6e6 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--color);
+    margin: 12px 0;
+    transition: background 0.5s ease, color 0.3s ease;
+}
+
+/* Bin Details */
+.bin-type { font-weight: 700; font-size: 16px; color: #333; margin-bottom: 4px; }
+.bin-detail { font-size: 13px; color: #666; margin: 2px 0; }
+.bin-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    width: 100%;
+}
+.bin-actions button {
+    flex: 1;
+    padding: 6px 0;
+    font-size: 13px;
+}
+
+/* Buttons */
+.empty-btn { background: #27ae60; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500; font-size: 14px; transition: 0.2s; }
+.empty-btn:hover { background: #21904d; }
+.btn-edit { background: #f39c12; color: #fff; }
+.btn-edit:hover { background: #d68910; }
+.btn-delete { background: #e74c3c; color: #fff; }
+.btn-delete:hover { background: #c0392b; }
+
+/* Add Bin Card Placeholder */
+.add-bin-card {
+    border: 2px dashed #ddd;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    min-height: 220px;
+}
+.add-bin-card:hover { border-color: #27ae60; background: #f9fdfa; }
+.add-bin-card i { font-size: 40px; color: #ccc; transition: color 0.2s; }
+.add-bin-card:hover i { color: #27ae60; }

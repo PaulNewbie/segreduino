@@ -61,7 +61,7 @@
 	width: 60px;
 }
 #sidebar .brand {
-	font-size: 24px;
+	font-size: 20px; /* Reduced from 24px for a cleaner fit */
 	font-weight: 700;
 	height: 56px;
 	display: flex;
@@ -72,17 +72,21 @@
 	left: 0;
 	background: var(--light);
 	z-index: 500;
-	padding-bottom: 20px;
-	box-sizing: content-box;
+    /* Removed the awkward 20px bottom padding to tighten the layout */
+    white-space: nowrap; /* Prevents long names from wrapping to a second line */
+    overflow: hidden;
 }
 #sidebar .brand .bx {
 	min-width: 60px;
 	display: flex;
 	justify-content: center;
 }
+#sidebar .brand .text {
+    text-overflow: ellipsis; /* Adds '...' if the text ever gets too long */
+}
 #sidebar .side-menu {
 	width: 100%;
-	margin-top: 48px;
+	margin-top: 24px; /* Reduced from 48px to bring the menu up slightly */
 }
 #sidebar .side-menu li {
 	height: 48px;
@@ -164,7 +168,6 @@
 	}
 }
 </style>
-
 
 <script>
 /* ==========================================

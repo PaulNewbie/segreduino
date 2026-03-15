@@ -1,83 +1,85 @@
-/* views/pages/css/history.css */
-main {
-  padding: 20px;
-}
+/* assets/css/pages/history.css */
+
+/* Layout & Cards */
 .card-custom {
-  background: var(--grey);
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-  margin-top: 20px;
-  transition: background 0.3s;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  margin-bottom: 24px;
+  border: 1px solid #f0f0f0;
 }
 .card-custom h2 {
+  margin-top: 0;
   margin-bottom: 20px;
-  color: black;
+  color: #2c3e50;
+  font-size: 22px;
 }
-.log-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 25px;
+.chart-section {
+  position: relative;
 }
-.log-table th, .log-table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
+
+/* Image Hover Zoom Effect */
+.waste-img-thumbnail {
+    max-width: 50px;
+    max-height: 50px;
+    border-radius: 6px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: zoom-in;
+    object-fit: cover;
 }
-.log-table th {
-  background-color: var(--light-green);
-  color: green;
-  font-weight: 600;
+.waste-img-thumbnail:hover {
+    transform: scale(3.5); /* Scales image up by 350% */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 100;
+    border-radius: 4px;
 }
-.log-table tr:hover {
-  background-color: inherit;
-}
+
+/* Table Controls & Filters (Imported from our global standard) */
+.table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: #f9f9f9; padding: 12px 16px; border-radius: 8px; }
+.filter-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.filter-input, .filter-select { padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; font-size: 14px; outline: none; background: #fff; transition: border 0.2s; }
+.filter-input:focus, .filter-select:focus { border-color: #27ae60; }
+.search-bar { min-width: 250px; }
+
+/* Scrollable Tables & Headers */
+.table-scroll-wrapper { max-height: 500px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; margin-bottom: 16px; }
+.table-scroll-wrapper table { width: 100%; border-collapse: collapse; }
+.table-scroll-wrapper th, .table-scroll-wrapper td { padding: 14px 16px; text-align: left; vertical-align: middle; border-bottom: 1px solid #eee; font-size: 14px; }
+.table-scroll-wrapper th { position: sticky; top: 0; z-index: 10; background: #e8f5e9; color: #27ae60; font-weight: 600; }
+.table-scroll-wrapper tr:last-child td { border-bottom: none; }
+.table-scroll-wrapper tr:hover { background: #fcfcfc; }
+
+/* Sorting Icons */
+th.sortable { cursor: pointer; user-select: none; transition: background 0.2s; }
+th.sortable:hover { background: #c8e6c9; }
+.sort-icon { margin-left: 6px; font-size: 14px; color: #666; vertical-align: middle; }
+
+/* Export Buttons */
 .export-buttons {
   display: flex;
   gap: 12px;
-  margin-top: 16px;
 }
 .export-buttons button {
-  background-color: #2ecc71;
+  background-color: #27ae60;
   color: white;
   border: none;
-  padding: 10px 18px;
+  padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease;
   font-weight: 500;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .export-buttons button:hover {
-  background-color: #27ae60;
+  background-color: #21904d;
 }
-.chart-section {
-  margin-top: 30px;
-}
-.head-title h1 {
-  font-size: 28px;
-  color: #2c3e50;
-}
-.breadcrumb {
-  list-style: none;
-  display: flex;
-  gap: 8px;
-  padding: 0;
-  margin-top: 10px;
-  color: #888;
-}
-.breadcrumb li a.active {
-  font-weight: bold;
-  color: #3498db;
-}
+
 @media (max-width: 900px) {
-  main {
-    padding: 10px;
-  }
-  .card-custom {
-    padding: 10px;
-  }
-  .log-table th, .log-table td {
-    padding: 8px 6px;
-    font-size: 14px;
-  }
+  .table-controls { flex-direction: column; align-items: stretch; }
+  .export-buttons { flex-wrap: wrap; }
 }

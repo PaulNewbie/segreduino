@@ -58,7 +58,7 @@ require_once __DIR__ . '/../layouts/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php
+              <?php
                 $sql = "SELECT id as user_id, CONCAT(first_name, ' ', last_name) AS full_name, role, status, email 
                         FROM admin_users WHERE role = 'admin'
                         UNION 
@@ -67,16 +67,35 @@ require_once __DIR__ . '/../layouts/header.php';
                 $result = $conn->query($sql);
                 if ($result && $result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
+                        // 1. Role Badge
                         $roleClass = (strtolower($row["role"]) === 'admin') ? 'role-admin' : 'role-staff';
+                        
+                        // 2. Native PHP Status Badge
+                        $rawStatus = strtolower(trim($row["status"] ?? ''));
+                        $statusClass = 'status-loading'; // Default gray
+                        $displayStatus = 'Unknown';
+                        
+                        if ($rawStatus === 'active' || $rawStatus === '1') {
+                            $statusClass = 'status-active';
+                            $displayStatus = 'Active';
+                        } elseif ($rawStatus === 'inactive' || $rawStatus === '0') {
+                            $statusClass = 'status-inactive';
+                            $displayStatus = 'Inactive';
+                        } elseif ($rawStatus !== '') {
+                            // Catches any other statuses your database might use
+                            $displayStatus = ucfirst($rawStatus);
+                        }
+
                         echo '<tr>';
                         echo '<td><strong>' . htmlspecialchars($row["full_name"]) . '</strong></td>';
                         echo '<td><span class="badge ' . $roleClass . '">' . htmlspecialchars(ucfirst($row["role"])) . '</span></td>';
                         echo '<td>' . htmlspecialchars($row["email"]) . '</td>';
-                        echo '<td><span id="status-' . htmlspecialchars($row["user_id"]) . '" class="badge status-loading">Checking...</span></td>';
+                        // Render the badge natively!
+                        echo '<td><span class="badge ' . $statusClass . '">' . htmlspecialchars($displayStatus) . '</span></td>';
                         echo '</tr>';
                     }
                 }
-                ?>
+              ?>
             </tbody>
             </table>
         </div>
@@ -117,7 +136,7 @@ require_once __DIR__ . '/../layouts/header.php';
                 $result = $conn->query($sql);
                 if ($result && $result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
-                        $timestamp = strtotime($row['login_time']); // Crucial for JS sorting
+                        $timestamp = strtotime($row['login_time']); 
                         $timeStr = date("M d, Y - g:i A", $timestamp);
                         $roleClass  = ($row['role'] === 'admin') ? 'role-admin' : 'role-staff';
                         $statusClass= (strtolower($row['login_status']) === 'success') ? 'status-active' : 'status-inactive';
@@ -180,6 +199,9 @@ require_once __DIR__ . '/../layouts/header.php';
 </main>
 
 <?php ob_start(); ?>
+
+<script src="/assets/js/table-utils.js"></script>
+
 <script>
 // --- 1. TAB SWITCHING ---
 function switchTab(evt, tabId) {
@@ -189,102 +211,40 @@ function switchTab(evt, tabId) {
     evt.currentTarget.classList.add('active');
 }
 
-// --- 2. INSTANT FILTERING LOGIC ---
+// --- 2. CLEAN UTILITY FILTER TRIGGERS ---
 function filterDirectory() {
-    let search = document.getElementById('searchDir').value.toLowerCase();
-    let role = document.getElementById('roleDir').value.toLowerCase();
-    let rows = document.querySelectorAll('#dirTable tbody tr');
-    
-    rows.forEach(row => {
-        let textMatch = row.innerText.toLowerCase().includes(search);
-        let roleMatch = role === 'all' || row.cells[1].innerText.toLowerCase().includes(role);
-        row.style.display = (textMatch && roleMatch) ? '' : 'none';
+    filterGenericTable({
+        tableId: 'dirTable',
+        searchId: 'searchDir',
+        statusId: 'roleDir',
+        statusCol: 1 // Role is in column index 1
     });
 }
 
 function filterLogs() {
-    let search = document.getElementById('searchLog').value.toLowerCase();
-    let status = document.getElementById('statusLog').value.toLowerCase();
-    let start = document.getElementById('dateStartLog').value ? new Date(document.getElementById('dateStartLog').value).setHours(0,0,0,0) / 1000 : 0;
-    let end = document.getElementById('dateEndLog').value ? new Date(document.getElementById('dateEndLog').value).setHours(23,59,59,999) / 1000 : Infinity;
-    let rows = document.querySelectorAll('#logTable tbody tr');
-
-    rows.forEach(row => {
-        let rowTime = parseInt(row.cells[0].getAttribute('data-time'));
-        let textMatch = row.innerText.toLowerCase().includes(search);
-        let statusMatch = status === 'all' || row.cells[3].innerText.toLowerCase() === status;
-        let dateMatch = rowTime >= start && rowTime <= end;
-        
-        row.style.display = (textMatch && statusMatch && dateMatch) ? '' : 'none';
+    filterGenericTable({
+        tableId: 'logTable',
+        searchId: 'searchLog',
+        statusId: 'statusLog',
+        statusCol: 3, // Status is in column index 3
+        startId: 'dateStartLog',
+        endId: 'dateEndLog',
+        timeCol: 0 // Date is in column index 0
     });
 }
 
 function filterActivity() {
-    let search = document.getElementById('searchAct').value.toLowerCase();
-    let start = document.getElementById('dateStartAct').value ? new Date(document.getElementById('dateStartAct').value).setHours(0,0,0,0) / 1000 : 0;
-    let end = document.getElementById('dateEndAct').value ? new Date(document.getElementById('dateEndAct').value).setHours(23,59,59,999) / 1000 : Infinity;
-    let rows = document.querySelectorAll('#actTable tbody tr');
-
-    rows.forEach(row => {
-        let rowTime = parseInt(row.cells[0].getAttribute('data-time'));
-        let textMatch = row.innerText.toLowerCase().includes(search);
-        let dateMatch = rowTime >= start && rowTime <= end;
-        
-        row.style.display = (textMatch && dateMatch) ? '' : 'none';
+    filterGenericTable({
+        tableId: 'actTable',
+        searchId: 'searchAct',
+        startId: 'dateStartAct',
+        endId: 'dateEndAct',
+        timeCol: 0 // Date is in column index 0
     });
 }
 
-// --- 3. INSTANT SORTING LOGIC ---
-const sortDirections = {};
-function sortTable(tableId, colIndex, isDate = false) {
-    const table = document.getElementById(tableId);
-    const tbody = table.querySelector('tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    
-    // Toggle sort direction
-    sortDirections[tableId] = sortDirections[tableId] || [];
-    sortDirections[tableId][colIndex] = !sortDirections[tableId][colIndex];
-    let isAsc = sortDirections[tableId][colIndex];
+// Note: sortTable() is completely removed here because it's handled by table-utils.js natively!
 
-    // Reset icons
-    table.querySelectorAll('th i').forEach(icon => icon.className = 'bx bx-sort sort-icon');
-    let currentIcon = table.querySelectorAll('th')[colIndex].querySelector('i');
-    currentIcon.className = isAsc ? 'bx bx-sort-up sort-icon' : 'bx bx-sort-down sort-icon';
-
-    rows.sort((a, b) => {
-        let cellA = a.cells[colIndex];
-        let cellB = b.cells[colIndex];
-        let valA, valB;
-
-        if (isDate) {
-            valA = parseInt(cellA.getAttribute('data-time'));
-            valB = parseInt(cellB.getAttribute('data-time'));
-        } else {
-            valA = cellA.innerText.trim().toLowerCase();
-            valB = cellB.innerText.trim().toLowerCase();
-        }
-
-        if (valA < valB) return isAsc ? -1 : 1;
-        if (valA > valB) return isAsc ? 1 : -1;
-        return 0;
-    });
-
-    rows.forEach(row => tbody.appendChild(row));
-}
-
-// --- 4. ASYNC STATUS CHECKING ---
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('span[id^="status-"]').forEach(function(span) {
-        var userId = span.id.replace('status-', '');
-        fetch('/views/pages/user_status.php?user_id=' + encodeURIComponent(userId))
-            .then(response => response.text())
-            .then(status => {
-                if (status === 'active') { span.textContent = 'Active'; span.className = 'badge status-active'; }
-                else if (status === 'inactive') { span.textContent = 'Inactive'; span.className = 'badge status-inactive'; }
-                else { span.textContent = 'Unknown'; span.className = 'badge status-loading'; }
-            }).catch(() => { span.textContent = 'Error'; span.className = 'badge status-loading'; });
-    });
-});
 </script>
 <?php 
 $extra_js = ob_get_clean();

@@ -26,14 +26,39 @@
 .tab-content.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px);} to { opacity: 1; transform: translateY(0);} }
 
-/* -----------------------------------------
-   MISSING STYLES RESTORED HERE 
-------------------------------------------*/
-.table-data { display: flex; flex-wrap: wrap; grid-gap: 24px; margin-top: 24px; width: 100%; }
-.table-data > div { border-radius: 20px; background: var(--light); padding: 24px; overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-.table-data .head { display: flex; align-items: center; justify-content: space-between; grid-gap: 16px; margin-bottom: 24px; }
-.table-data .head h3 { font-size: 24px; font-weight: 600; color: var(--dark); }
-.table-data .order { flex-grow: 1; flex-basis: 500px; background: #fff; }
+/* ---------------------------------------------------
+   STRUCTURAL STYLES (RESTORES THE WHITE CARDS)
+---------------------------------------------------- */
+.table-data {
+    display: flex;
+    flex-wrap: wrap;
+    grid-gap: 24px;
+    margin-top: 24px;
+    width: 100%;
+}
+.table-data > div {
+    border-radius: 20px;
+    background: #ffffff;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+.table-data .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    grid-gap: 16px;
+    margin-bottom: 24px;
+}
+.table-data .head h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 0;
+}
+.table-data .order {
+    flex-grow: 1;
+    flex-basis: 500px;
+}
 
 /* Table Controls & Filters */
 .table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: #f9f9f9; padding: 12px 16px; border-radius: 8px; }

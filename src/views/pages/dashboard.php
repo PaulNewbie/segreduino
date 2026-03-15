@@ -76,8 +76,8 @@ if ($userResult && $userResult->num_rows > 0) {
 // ---------------------------------------------------------
 $page_title = "Dashboard - Admin";
 $current_page = "dashboard"; 
-// Cache-busting query string added to CSS to force browser to load the new styles
-$extra_css = '<link rel="stylesheet" href="/assets/css/pages/dashboard.css?v=' . time() . '" />';
+// Dynamic CSS versioning to prevent caching issues
+$extra_css = '<link rel="stylesheet" href="/assets/css/pages/dashboard.css" />';
 require_once __DIR__ . '/../layouts/header.php'; 
 ?>
 
