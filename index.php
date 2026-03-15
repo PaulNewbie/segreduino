@@ -46,6 +46,14 @@ switch ($request) {
         require __DIR__ . '/src/views/pages/user.php';
         break;
 
+    // EXTRA PAGES
+    case '/schedules.php':
+        require __DIR__ . '/src/views/pages/schedules.php';
+        break;
+    case '/tasks.php':
+        require __DIR__ . '/src/views/pages/tasks.php';
+        break;
+
     // AUTH PAGES
     case '/login.php':
         require __DIR__ . '/src/views/auth/login.php';

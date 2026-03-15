@@ -1,5 +1,5 @@
 <?php
-// views/pages/dashboard.php
+// src/views/pages/dashboard.php
 
 if (!isset($_SESSION['username'])) {
     header("Location: /login.php");
@@ -12,7 +12,7 @@ if ($conn->connect_error) {
 }
 
 // ---------------------------------------------------------
-// DATA FETCHING LOGIC 
+// DATA FETCHING LOGIC
 // ---------------------------------------------------------
 $bin_types = [];
 $where = "";
@@ -62,7 +62,7 @@ if ($result) {
     }
 }
 
-// Fetch Users for the dropdowns (to avoid repeating the query twice)
+// Fetch Users for the dropdowns
 $users = [];
 $userResult = $conn->query("SELECT user_id, full_name FROM users ORDER BY full_name ASC");
 if ($userResult && $userResult->num_rows > 0) {
@@ -72,13 +72,12 @@ if ($userResult && $userResult->num_rows > 0) {
 }
 
 // ---------------------------------------------------------
-// PAGE SETUP & LAYOUT INCLUSION
+// PAGE SETUP
 // ---------------------------------------------------------
 $page_title = "Dashboard - Admin";
 $current_page = "dashboard"; 
-$extra_css = '<link rel="stylesheet" href="/assets/css/pages/dashboard.css" />';
-
-// Pull in the top layout
+// Cache-busting query string added to CSS to force browser to load the new styles
+$extra_css = '<link rel="stylesheet" href="/assets/css/pages/dashboard.css?v=' . time() . '" />';
 require_once __DIR__ . '/../layouts/header.php'; 
 ?>
 
@@ -94,213 +93,242 @@ require_once __DIR__ . '/../layouts/header.php';
     </div>
   </div>
 
-  <div class="main">
-    <div class="bin-grid" id="binGrid">
-      <?php foreach ($bin_types as $type): ?>
-        <?php 
-          $status = (int)($bin_data[$type]['status'] ?? 0); 
-          $color = "#6a5acd"; 
-          if ($status < 50) { $color = "#1abc3a"; } 
-          elseif ($status < 80) { $color = "#f39c12"; } 
-          else { $color = "#e74c3c"; }
-        ?>
-        <div class="bin-card" data-bin="<?php echo htmlspecialchars($type); ?>">
-          <h4><?php echo htmlspecialchars($type); ?></h4>
-          <div class="progress-circle" style="--value: <?= $status ?>%; --color: <?= $color ?>;">
-            <span><?= $status ?>%</span>
-          </div>
-          <p class="bin-date">Last Updated: <?php echo htmlspecialchars($bin_data[$type]['last_updated'] ?? 'N/A'); ?></p>
-          <p class="bin-floor">Floor Level: <?php echo htmlspecialchars($bin_data[$type]['floor_level'] ?? 'N/A'); ?></p>
-          <p class="bin-machine">Machine: <?php echo htmlspecialchars($bin_data[$type]['machine_name'] ?? 'N/A'); ?></p>
+  <div class="bin-grid" id="binGrid">
+    <?php foreach ($bin_types as $type): ?>
+      <?php 
+        $status = (int)($bin_data[$type]['status'] ?? 0); 
+        $color = "#6a5acd"; 
+        if ($status < 50) { $color = "#1abc3a"; } 
+        elseif ($status < 80) { $color = "#f39c12"; } 
+        else { $color = "#e74c3c"; }
+      ?>
+      <div class="bin-card" data-bin="<?php echo htmlspecialchars($type); ?>">
+        <h4><?php echo htmlspecialchars($type); ?></h4>
+        <div class="progress-circle" style="--value: <?= $status ?>%; --color: <?= $color ?>;">
+          <span><?= $status ?>%</span>
         </div>
-      <?php endforeach; ?>
-    </div>
+        <p class="bin-date" style="font-size: 13px; color: #666;">Last Updated: <?php echo htmlspecialchars($bin_data[$type]['last_updated'] ?? 'N/A'); ?></p>
+        <p class="bin-floor" style="font-size: 14px; margin-top: 6px;">Floor: <strong><?php echo htmlspecialchars($bin_data[$type]['floor_level'] ?? 'N/A'); ?></strong></p>
+        <p class="bin-machine" style="font-size: 14px;">Kiosk: <strong><?php echo htmlspecialchars($bin_data[$type]['machine_name'] ?? 'N/A'); ?></strong></p>
+      </div>
+    <?php endforeach; ?>
+  </div>
 
-    <div class="table-data">
-      <div class="order">
-        <div class="head">
-          <h3>Schedule</h3>
-          <i class="bx bx-search"></i>
-          <i class="bx bx-chevron-down" style="color: black;" id="scheduleDropdownBtn"></i>
-          <div id="scheduleDropdown" class="schedule-dropdown">
-            <button class="schedule-filter-btn" data-filter="tomorrow">Schedule for Tomorrow</button>
-            <button class="schedule-filter-btn" data-filter="week">Schedule for Week</button>
-            <button class="schedule-filter-btn" data-filter="month">Schedule for Month</button>
+  <div class="nav-tabs">
+      <button class="nav-tab-btn active" onclick="switchTab(event, 'schedules-tab')">Recent Schedules</button>
+      <button class="nav-tab-btn" onclick="switchTab(event, 'tasks-tab')">Recent Tasks</button>
+  </div>
+
+  <div class="table-data">
+    
+    <div class="order tab-content active" id="schedules-tab">
+      <div class="head">
+        <h3>Schedule Overview</h3>
+        <button class="empty-btn" id="openScheduleModalBtn"><i class="bx bx-plus"></i> Add Schedule</button>
+      </div>
+      
+      <div class="table-controls">
+          <input type="text" id="searchSched" class="filter-input search-bar" placeholder="Search user or task..." onkeyup="runSchedFilter()">
+          <div class="filter-group">
+              <label style="font-size:14px; color:#555;">Date:</label>
+              <input type="date" id="dateStartSched" class="filter-input" onchange="runSchedFilter()">
+              <span style="color:#888;">to</span>
+              <input type="date" id="dateEndSched" class="filter-input" onchange="runSchedFilter()">
           </div>
-        </div>
-        <table>
+      </div>
+
+      <div class="table-scroll-wrapper">
+          <table id="dashSchedTable">
           <thead>
-            <tr>
-              <th>Name</th><th>Floor Level</th><th>Task Description</th><th>Schedule Date</th><th>Created At</th>
-            </tr>
+              <tr>
+              <th class="sortable" onclick="sortTable('dashSchedTable', 0)">Name <i class='bx bx-sort sort-icon'></i></th>
+              <th class="sortable" onclick="sortTable('dashSchedTable', 1)">Floor Level <i class='bx bx-sort sort-icon'></i></th>
+              <th class="sortable" onclick="sortTable('dashSchedTable', 2)">Task <i class='bx bx-sort sort-icon'></i></th>
+              <th class="sortable" onclick="sortTable('dashSchedTable', 3, true)">Schedule Date <i class='bx bx-sort sort-icon'></i></th>
+              </tr>
           </thead>
           <tbody>
-            <?php
-            $where = "";
-            if (isset($_GET['schedule_filter'])) {
-                if ($_GET['schedule_filter'] === 'tomorrow') {
-                    $tomorrow = date('Y-m-d', strtotime('+1 day'));
-                    $where = "WHERE schedules.schedule_date = '$tomorrow'";
-                } elseif ($_GET['schedule_filter'] === 'week') {
-                    $monday = date('Y-m-d', strtotime('monday this week'));
-                    $sunday = date('Y-m-d', strtotime('sunday this week'));
-                    $where = "WHERE schedules.schedule_date BETWEEN '$monday' AND '$sunday'";
-                } elseif ($_GET['schedule_filter'] === 'month') {
-                    $first = date('Y-m-01');
-                    $last = date('Y-m-t');
-                    $where = "WHERE schedules.schedule_date BETWEEN '$first' AND '$last'";
-                }
-            }
-            $sql = "SELECT users.full_name, schedules.floor_level, schedules.task_description, schedules.schedule_date, schedules.created_at FROM schedules JOIN users ON schedules.user_id = users.user_id $where ORDER BY schedules.created_at DESC";
-            $result = $conn->query($sql);
-            if ($result && $result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
-                    echo '<tr><td>'.htmlspecialchars($row["full_name"]).'</td><td>'.htmlspecialchars($row["floor_level"]).'</td><td>'.htmlspecialchars($row["task_description"]).'</td><td>'.htmlspecialchars($row["schedule_date"]).'</td><td>'.htmlspecialchars($row["created_at"]).'</td></tr>';
-                }
-            } else {
-                echo '<tr><td colspan="5">No schedule found</td></tr>';
-            }
-            ?>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="todo">
-        <div class="head">
-          <h3>Add Schedule</h3>
-          <i class="bx bx-plus" id="addScheduleBtn" style="cursor:pointer;"></i>
-          <i class="bx bx-chevron-down" style="color: white;"></i>
-        </div>
-        <form id="addScheduleForm" method="post" action="/controllers/Actions/add_schedule.php" style="display:none; margin-top:16px; background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.07); padding:24px; max-width:400px;">
-          <div style="display:flex; flex-direction:column; gap:16px;">
-            <select name="user_id" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
-              <option value="">Select User</option>
               <?php
-              foreach($users as $user) {
-                  echo '<option value="' . htmlspecialchars($user["user_id"]) . '">' . htmlspecialchars($user["full_name"]) . '</option>';
-              }
-              ?>
-            </select>
-            <input type="text" name="floor_level" placeholder="Floor Level" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
-            <input type="text" name="task_description" placeholder="Task Description" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
-            <input type="date" name="schedule_date" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
-            <button type="submit" style="background:green; color:#fff; border:none; border-radius:8px; padding:12px; font-size:16px; cursor:pointer;">Add Schedule</button>
-          </div>
-        </form>
-      </div>
-    </div>
-    
-    <div class="table-data">
-        <div class="order">
-          <div class="head">
-            <h3>Task</h3>
-            <i class="bx bx-search"></i>
-            <i class="bx bx-filter"></i>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Bin ID</th>
-                <th>Machine ID</th>
-                <th>Task Description</th>
-                <th>Status</th>
-                <th>Created At</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php
-              $sql = "SELECT users.full_name, tasks.bin_id, tasks.machine_id, tasks.task_description, tasks.task_status, tasks.created_at FROM tasks JOIN users ON tasks.user_id = users.user_id ORDER BY tasks.created_at DESC";
+              $sql = "SELECT users.full_name, schedules.floor_level, schedules.task_description, schedules.schedule_date 
+                      FROM schedules JOIN users ON schedules.user_id = users.user_id 
+                      ORDER BY schedules.schedule_date ASC LIMIT 50";
               $result = $conn->query($sql);
               if ($result && $result->num_rows > 0) {
-                  while ($row = $result->fetch_assoc()) {
+                  while($row = $result->fetch_assoc()) {
+                      $timestamp = strtotime($row["schedule_date"]);
                       echo '<tr>';
-                      echo '<td>' . htmlspecialchars($row["full_name"]) . '</td>';
-                      echo '<td>' . htmlspecialchars($row["bin_id"]) . '</td>';
-                      echo '<td>' . htmlspecialchars($row["machine_id"]) . '</td>';
-                      echo '<td>' . htmlspecialchars($row["task_description"]) . '</td>';
-                      echo '<td>' . htmlspecialchars($row["task_status"]) . '</td>';
-                      echo '<td>' . htmlspecialchars($row["created_at"]) . '</td>';
+                      echo '<td><strong>'.htmlspecialchars($row["full_name"]).'</strong></td>';
+                      echo '<td>'.htmlspecialchars($row["floor_level"]).'</td>';
+                      echo '<td>'.htmlspecialchars($row["task_description"]).'</td>';
+                      echo "<td data-time='$timestamp'>".htmlspecialchars(date('M d, Y', $timestamp))."</td>";
                       echo '</tr>';
                   }
               } else {
-                  echo '<tr><td colspan="6">No tasks found</td></tr>';
+                  echo '<tr><td colspan="4" style="text-align:center; padding: 20px;">No recent schedules found</td></tr>';
               }
               ?>
-            </tbody>
+          </tbody>
           </table>
-        </div>
+      </div>
+      <a href="/schedules.php" class="view-all-link">View All Schedules in Directory</a>
+    </div>
 
-        <div class="todo">
-          <div class="head" style="display: flex; align-items: center; justify-content: space-between;">
-            <h3>Add Tasks</h3>
-            <div>
-              <i class="bx bx-plus" id="addTaskBtn" style="cursor:pointer;"></i>
-              <i class="bx bx-filter" style="color: white;"></i>
-            </div>
+    <div class="order tab-content" id="tasks-tab">
+      <div class="head">
+        <h3>Task Overview</h3>
+        <button class="empty-btn" id="openTaskModalBtn"><i class="bx bx-plus"></i> Add Task</button>
+      </div>
+
+      <div class="table-controls">
+          <input type="text" id="searchTask" class="filter-input search-bar" placeholder="Search user or bin..." onkeyup="runTaskFilter()">
+          <div class="filter-group">
+              <label style="font-size:14px; color:#555;">Status:</label>
+              <select id="statusTask" class="filter-select" onchange="runTaskFilter()">
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="in progress">In Progress</option>
+                  <option value="done">Done</option>
+              </select>
           </div>
-          <form id="addTasksForm" method="post" action="/controllers/Actions/add_tasks.php" style="display:none; background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.07); padding:24px; max-width:400px; margin-top:16px;">
-            <div style="display:flex; flex-direction:column; gap:16px;">
-              <select name="user_id" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
-                <option value="">-- Select User --</option>
-                <?php
-                foreach($users as $user) {
-                    echo '<option value="' . htmlspecialchars($user['user_id']) . '">' . htmlspecialchars($user['full_name']) . '</option>';
-                }
-                ?>
-              </select>
-              <input type="text" id="bin_id" name="bin_id" placeholder="Bin ID" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
-              <input type="text" id="machine_id" name="machine_id" placeholder="Machine ID" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
-              <textarea id="task_description" name="task_description" rows="3" placeholder="Task Description" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px; font-family: inherit;"></textarea>
-              <select id="status" name="status" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
-                <option value="Select">-- Select Status --</option>
-                <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Done">Done</option>
-              </select>
-              <input type="datetime-local" id="created_at" name="created_at" required style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
-              <button type="submit" style="background:green; color:#fff; border:none; border-radius:8px; padding:12px; font-size:16px; cursor:pointer;">Add Task</button>
-            </div>
-          </form>
-        </div>
+          <div class="filter-group">
+              <label style="font-size:14px; color:#555;">Created:</label>
+              <input type="date" id="dateStartTask" class="filter-input" onchange="runTaskFilter()">
+              <span style="color:#888;">to</span>
+              <input type="date" id="dateEndTask" class="filter-input" onchange="runTaskFilter()">
+          </div>
+      </div>
+
+      <div class="table-scroll-wrapper">
+          <table id="dashTaskTable">
+          <thead>
+              <tr>
+              <th class="sortable" onclick="sortTable('dashTaskTable', 0)">User <i class='bx bx-sort sort-icon'></i></th>
+              <th class="sortable" onclick="sortTable('dashTaskTable', 1)">Bin ID <i class='bx bx-sort sort-icon'></i></th>
+              <th class="sortable" onclick="sortTable('dashTaskTable', 2)">Task <i class='bx bx-sort sort-icon'></i></th>
+              <th class="sortable" onclick="sortTable('dashTaskTable', 3)">Status <i class='bx bx-sort sort-icon'></i></th>
+              <th class="sortable" onclick="sortTable('dashTaskTable', 4, true)">Created At <i class='bx bx-sort sort-icon'></i></th>
+              </tr>
+          </thead>
+          <tbody>
+              <?php
+              $sql = "SELECT users.full_name, tasks.bin_id, tasks.task_description, tasks.task_status, tasks.created_at 
+                      FROM tasks JOIN users ON tasks.user_id = users.user_id 
+                      ORDER BY tasks.created_at DESC LIMIT 50";
+              $result = $conn->query($sql);
+              if ($result && $result->num_rows > 0) {
+                  while ($row = $result->fetch_assoc()) {
+                      $timestamp = strtotime($row["created_at"]);
+                      
+                      $statusClass = 'pending'; 
+                      if (trim($row["task_status"]) === 'In Progress') $statusClass = 'in-progress';
+                      if (trim($row["task_status"]) === 'Done' || trim($row["task_status"]) === 'Completed') $statusClass = 'done';
+
+                      echo '<tr>';
+                      echo '<td><strong>' . htmlspecialchars($row["full_name"]) . '</strong></td>';
+                      echo '<td>Bin: ' . htmlspecialchars($row["bin_id"]) . '</td>';
+                      echo '<td>' . htmlspecialchars($row["task_description"]) . '</td>';
+                      
+                      // Status Badge coloring inline
+                      $bg = "#fff3e0"; $txt = "#e65100";
+                      if ($statusClass == 'in-progress') { $bg = "#e3f2fd"; $txt = "#1565c0"; }
+                      if ($statusClass == 'done') { $bg = "#e8f5e9"; $txt = "#2e7d32"; }
+
+                      echo '<td><span style="background:'.$bg.'; color:'.$txt.'; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">' . htmlspecialchars(trim($row["task_status"])) . '</span></td>';
+                      echo "<td data-time='$timestamp'>" . htmlspecialchars(date('M d, Y', $timestamp)) . '</td>';
+                      echo '</tr>';
+                  }
+              } else {
+                  echo '<tr><td colspan="5" style="text-align:center; padding: 20px;">No recent tasks found</td></tr>';
+              }
+              ?>
+          </tbody>
+          </table>
+      </div>
+      <a href="/tasks.php" class="view-all-link">View All Tasks in Directory</a>
     </div>
     
   </div>
 </main>
 
-<?php 
-// ---------------------------------------------------------
-// PAGE SPECIFIC SCRIPTS (Injected into footer)
-// ---------------------------------------------------------
-ob_start(); 
-?>
+<div id="scheduleModal" class="custom-modal">
+  <form id="addScheduleForm" method="post" action="/controllers/Actions/add_schedule.php" class="modal-form">
+    <h2>Add Schedule</h2>
+    <select name="user_id" required>
+      <option value="">-- Select User --</option>
+      <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user["user_id"]) . '">' . htmlspecialchars($user["full_name"]) . '</option>'; } ?>
+    </select>
+    <input type="text" name="floor_level" placeholder="Floor Level" required>
+    <input type="text" name="task_description" placeholder="Task Description" required>
+    <input type="date" name="schedule_date" required>
+    <div class="modal-actions">
+      <button type="submit" class="empty-btn" style="justify-content:center;">Save Schedule</button>
+      <button type="button" class="cancel-btn" id="closeScheduleModalBtn">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="taskModal" class="custom-modal">
+  <form id="addTasksForm" method="post" action="/controllers/Actions/add_tasks.php" class="modal-form">
+    <h2>Add Task</h2>
+    <select name="user_id" required>
+      <option value="">-- Select User --</option>
+      <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user['user_id']) . '">' . htmlspecialchars($user['full_name']) . '</option>'; } ?>
+    </select>
+    <div style="display:flex; gap:12px;">
+      <input type="text" id="machine_id" name="machine_id" placeholder="Machine ID" required style="flex:1;">
+      <input type="text" id="bin_id" name="bin_id" placeholder="Bin ID" required style="flex:1;">
+    </div>
+    <textarea id="task_description" name="task_description" rows="3" placeholder="Task Description" required></textarea>
+    <select id="status" name="status" required>
+      <option value="">-- Select Status --</option>
+      <option value="Pending">Pending</option>
+      <option value="In Progress">In Progress</option>
+      <option value="Done">Done</option>
+    </select>
+    <input type="datetime-local" id="created_at" name="created_at" required>
+    <div class="modal-actions">
+      <button type="submit" class="empty-btn" style="justify-content:center;">Save Task</button>
+      <button type="button" class="cancel-btn" id="closeTaskModalBtn">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<?php ob_start(); ?>
+
+<script src="/assets/js/table-utils.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Toggle Add Schedule form
-  const addScheduleBtn = document.getElementById('addScheduleBtn');
-  const addScheduleForm = document.getElementById('addScheduleForm');
-  if (addScheduleBtn && addScheduleForm) {
-    addScheduleBtn.onclick = () => { addScheduleForm.style.display = (addScheduleForm.style.display === 'none' || addScheduleForm.style.display === '') ? 'block' : 'none'; };
-  }
-  
-  // Toggle Add Tasks form (RESTORED)
-  const addTaskBtn = document.getElementById('addTaskBtn');
-  const addTasksForm = document.getElementById('addTasksForm');
-  if (addTaskBtn && addTasksForm) {
-    addTaskBtn.onclick = () => { addTasksForm.style.display = (addTasksForm.style.display === 'none' || addTasksForm.style.display === '') ? 'block' : 'none'; };
-  }
-
-  // Dropdown UI Logic
-  const scheduleDropdownBtn = document.getElementById('scheduleDropdownBtn');
-  const scheduleDropdown = document.getElementById('scheduleDropdown');
-  if (scheduleDropdownBtn && scheduleDropdown) {
-    scheduleDropdownBtn.onclick = (e) => { e.stopPropagation(); scheduleDropdown.style.display = (scheduleDropdown.style.display === 'block') ? 'none' : 'block'; };
-    document.addEventListener('click', (event) => {
-      if (!scheduleDropdown.contains(event.target) && !scheduleDropdownBtn.contains(event.target)) scheduleDropdown.style.display = 'none';
+// Filter Setup
+function runSchedFilter() {
+    filterGenericTable({
+        tableId: 'dashSchedTable', searchId: 'searchSched', startId: 'dateStartSched', endId: 'dateEndSched', timeCol: 3
     });
-  }
+}
+function runTaskFilter() {
+    filterGenericTable({
+        tableId: 'dashTaskTable', searchId: 'searchTask', statusId: 'statusTask', statusCol: 3, startId: 'dateStartTask', endId: 'dateEndTask', timeCol: 4
+    });
+}
 
-  // Live Bin Data Update
+// Tab Switching
+function switchTab(evt, tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    evt.currentTarget.classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const scheduleModal = document.getElementById('scheduleModal');
+  const taskModal = document.getElementById('taskModal');
+
+  document.getElementById('openScheduleModalBtn').onclick = () => scheduleModal.style.display = 'flex';
+  document.getElementById('closeScheduleModalBtn').onclick = () => { scheduleModal.style.display = 'none'; document.getElementById('addScheduleForm').reset(); };
+  
+  document.getElementById('openTaskModalBtn').onclick = () => taskModal.style.display = 'flex';
+  document.getElementById('closeTaskModalBtn').onclick = () => { taskModal.style.display = 'none'; document.getElementById('addTasksForm').reset(); };
+
+  // Live Bin Data
   async function fetchLiveBinData() {
     try {
       const response = await fetch("/controllers/Api/fetch_bin_status.php");
@@ -334,7 +362,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <?php 
 $extra_js = ob_get_clean();
-
-// Pull in the bottom layout
 require_once __DIR__ . '/../layouts/footer.php'; 
 ?>
