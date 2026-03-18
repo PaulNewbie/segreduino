@@ -80,6 +80,18 @@ require_once __DIR__ . '/../layouts/header.php';
   </div>
 
   <div class="card-custom">
+      
+    <?php if (isset($_GET['success'])): ?>
+        <div style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+            <?= htmlspecialchars($_GET['success']) ?>
+        </div>
+    <?php endif; ?>
+    <?php if (isset($_GET['error'])): ?>
+        <div style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+            <?= htmlspecialchars($_GET['error']) ?>
+        </div>
+    <?php endif; ?>
+
     <div class="table-controls">
         <div class="filter-group">
             <label for="dateFilter" style="font-weight: 500; color: #555;">View:</label>
@@ -139,18 +151,49 @@ require_once __DIR__ . '/../layouts/header.php';
 </main>
 
 <div id="scheduleModal" class="custom-modal">
-  <form id="addScheduleForm" method="post" action="/controllers/Actions/add_schedule.php" class="modal-form">
-    <h2>Add Schedule</h2>
-    <select name="user_id" required>
-      <option value="">-- Select Staff Member --</option>
-      <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user["user_id"]) . '">' . htmlspecialchars($user["full_name"]) . '</option>'; } ?>
-    </select>
-    <input type="text" name="floor_level" placeholder="E.g., 2nd Floor, Main Wing" required>
-    <input type="text" name="task_description" placeholder="Task Description" required>
-    <input type="date" name="schedule_date" required>
-    <div class="modal-actions">
-      <button type="submit" class="btn-primary" style="justify-content:center;">Save Schedule</button>
-      <button type="button" class="cancel-btn" id="closeScheduleModalBtn">Cancel</button>
+  <form id="addScheduleForm" method="post" action="/controllers/Actions/add_schedule.php" class="modal-form" style="padding: 24px; border-radius: 12px; width: 100%; max-width: 420px; gap: 16px; display: flex; flex-direction: column;">
+    <h2 style="margin: 0 0 10px 0; font-size: 22px; color: #333;">Add Schedule</h2>
+    
+    <div>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Assign Staff <span style="color:red;">*</span></label>
+        <select name="user_id" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
+          <option value="">-- Select Staff Member --</option>
+          <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user["user_id"]) . '">' . htmlspecialchars($user["full_name"]) . '</option>'; } ?>
+        </select>
+    </div>
+    
+    <div>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Floor Level <span style="color:red;">*</span></label>
+        <select name="floor_level" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
+          <option value="">-- Select Floor Level --</option>
+          <option value="1st Floor">1st Floor</option>
+          <option value="2nd Floor">2nd Floor</option>
+          <option value="3rd Floor">3rd Floor</option>
+        </select>
+    </div>
+
+    <div>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Task Description <span style="color:red;">*</span></label>
+        <input type="text" list="commonTasks" name="task_description" placeholder="Select from list or type a custom task..." required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa;">
+        <datalist id="commonTasks">
+            <option value="Empty All Bins">
+            <option value="Perform Routine Maintenance">
+            <option value="Clean Kiosk Area">
+            <option value="Inspect Sensors">
+        </datalist>
+        <small style="color: #888; font-size: 12px; margin-top: 6px; display: block;">
+            <i class='bx bx-info-circle'></i> Double-click the input box to see common tasks.
+        </small>
+    </div>
+
+    <div>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Schedule Date <span style="color:red;">*</span></label>
+        <input type="date" name="schedule_date" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
+    </div>
+
+    <div class="modal-actions" style="display: flex; gap: 12px; margin-top: 10px;">
+      <button type="submit" class="btn-primary" style="flex: 1; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Save Schedule</button>
+      <button type="button" class="cancel-btn" id="closeScheduleModalBtn" style="flex: 1; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; background: #f1f1f1; color: #333; border: none; cursor: pointer;">Cancel</button>
     </div>
   </form>
 </div>

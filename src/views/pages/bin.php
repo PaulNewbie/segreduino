@@ -136,13 +136,6 @@ require_once __DIR__ . '/../layouts/header.php';
       <?php foreach($machines as $m) { echo "<option value='".htmlspecialchars($m['machine_id'])."'>".htmlspecialchars($m['machine_name'])."</option>"; } ?>
     </select>
     
-    <select name="floor_level" required style="width:100%; padding:12px 14px; border-radius:8px; border:1px solid #ddd; outline:none;">
-      <option value="">Select Floor</option>
-      <option value="1st Floor">1st Floor</option>
-      <option value="2nd Floor">2nd Floor</option>
-      <option value="3rd Floor">3rd Floor</option>
-    </select>
-    
     <select id="binTypeSelect" name="bin_type" required style="width:100%; padding:12px 14px; border-radius:8px; border:1px solid #ddd; outline:none;">
       <option value="">Select Type</option>
       <option value="BIODEGRADABLE">BIODEGRADABLE</option>
@@ -163,12 +156,12 @@ require_once __DIR__ . '/../layouts/header.php';
 <script>
 // JSON Response handler
 async function safeParseResponse(resp) {
+  const text = await resp.text(); // Read the stream once as text
   try {
-    const json = await resp.json();
+    const json = JSON.parse(text); // Try to parse that text into JSON
     return { type: 'json', data: json };
   } catch (err) {
-    const txt = await resp.text();
-    return { type: 'text', data: txt };
+    return { type: 'text', data: text }; // If it fails, return the raw text
   }
 }
 

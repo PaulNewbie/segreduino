@@ -2,46 +2,46 @@
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Get user_id directly from POST
-    $user_id = trim($_POST['user_id']);
-    $floor_level = trim($_POST['floor_level']);
-    $task_description = trim($_POST['task_description']);
-    $schedule_date = $_POST['schedule_date'];
-    $created_at = date('Y-m-d H:i:s'); // current time
+    require_once __DIR__ . '/../../config/config.php';
+    
+    // Figure out where the user came from (Dashboard vs Schedules page)
+    $referer = $_SERVER['HTTP_REFERER'] ?? '/dashboard.php';
+    // Remove old ?success or ?error parameters from the URL
+    $redirect_url = strtok($referer, '?'); 
 
-    // Basic validation
-    if (empty($user_id) || empty($floor_level) || empty($task_description) || empty($schedule_date)) {
-        die("All fields are required.");
+    if ($conn->connect_error) {
+        header("Location: $redirect_url?error=" . urlencode("Database connection failed."));
+        exit;
     }
 
-    // Database connection
-    require_once __DIR__ . '/../../config/config.php';
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
+    // Get and sanitize inputs safely
+    $user_id = filter_input(INPUT_POST, 'user_id', FILTER_VALIDATE_INT);
+    $floor_level = trim($_POST['floor_level'] ?? '');
+    $task_description = trim($_POST['task_description'] ?? '');
+    $schedule_date = trim($_POST['schedule_date'] ?? '');
+    $created_at = date('Y-m-d H:i:s'); 
+
+    // Basic validation
+    if (!$user_id || empty($floor_level) || empty($task_description) || empty($schedule_date)) {
+        header("Location: $redirect_url?error=" . urlencode("All fields are required."));
+        exit;
     }
 
     // Insert into schedules table
     $stmt = $conn->prepare("INSERT INTO schedules (user_id, floor_level, task_description, schedule_date, created_at) VALUES (?, ?, ?, ?, ?)");
-    if (!$stmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-
     $stmt->bind_param("issss", $user_id, $floor_level, $task_description, $schedule_date, $created_at);
 
     if ($stmt->execute()) {
-        $stmt->close();
-        
-        header("Location: /dashboard.php?success=schedule_added");
-        exit;
+        header("Location: $redirect_url?success=" . urlencode("Schedule successfully added."));
     } else {
-        echo "Error inserting schedule: " . $stmt->error;
-        $stmt->close();
-        
-        exit;
+        error_log("Insert Error: " . $stmt->error);
+        header("Location: $redirect_url?error=" . urlencode("Error saving schedule to the database."));
     }
+    
+    $stmt->close();
+    exit;
 } else {
-    // Not a POST request
-    header("Location: dashboard.php");
+    header("Location: /dashboard.php");
     exit;
 }
 ?>

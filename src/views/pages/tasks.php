@@ -27,10 +27,8 @@ $cleanFilter = strtolower(trim($filter));
 if ($cleanFilter === 'pending') {
     $whereClause = "WHERE LOWER(tasks.task_status) LIKE '%pending%'";
 } elseif ($cleanFilter === 'in progress') {
-    // This will catch "In Progress", "In-Progress", "InProgress", etc.
     $whereClause = "WHERE LOWER(tasks.task_status) LIKE '%progress%'";
 } elseif ($cleanFilter === 'done' || $cleanFilter === 'completed') {
-    // This catches both "Done" and "Completed" just to be safe
     $whereClause = "WHERE LOWER(tasks.task_status) LIKE '%done%' OR LOWER(tasks.task_status) LIKE '%complete%'";
 }
 
@@ -40,10 +38,13 @@ $countResult = $conn->query($countSql);
 $totalRows = $countResult->fetch_assoc()['total'] ?? 0;
 $totalPages = ceil($totalRows / $limit);
 
-// Fetch task data
-$sql = "SELECT users.full_name, tasks.bin_id, tasks.machine_id, tasks.task_description, tasks.task_status, tasks.created_at 
+// Fetch task data WITH Machine and Bin Names (Using JOINs)
+$sql = "SELECT users.full_name, tasks.task_description, tasks.task_status, tasks.created_at, 
+               machines.machine_name, trash_bins.bin_type 
         FROM tasks 
         JOIN users ON tasks.user_id = users.user_id 
+        LEFT JOIN machines ON tasks.machine_id = machines.machine_id
+        LEFT JOIN trash_bins ON tasks.bin_id = trash_bins.bin_id
         $whereClause 
         ORDER BY tasks.created_at DESC 
         LIMIT $limit OFFSET $offset";
@@ -55,6 +56,24 @@ $userResult = $conn->query("SELECT user_id, full_name FROM users ORDER BY full_n
 if ($userResult && $userResult->num_rows > 0) {
     while($row = $userResult->fetch_assoc()) {
         $users[] = $row;
+    }
+}
+
+// Fetch Machines for Modal dropdown
+$machines = [];
+$machineResult = $conn->query("SELECT machine_id, machine_name FROM machines ORDER BY machine_name ASC");
+if ($machineResult && $machineResult->num_rows > 0) {
+    while($row = $machineResult->fetch_assoc()) {
+        $machines[] = $row;
+    }
+}
+
+// Fetch Bins to feed to our Javascript
+$bins = [];
+$binResult = $conn->query("SELECT bin_id, machine_id, bin_type FROM trash_bins ORDER BY bin_type ASC");
+if ($binResult && $binResult->num_rows > 0) {
+    while($row = $binResult->fetch_assoc()) {
+        $bins[] = $row;
     }
 }
 
@@ -80,6 +99,17 @@ require_once __DIR__ . '/../layouts/header.php';
   </div>
 
   <div class="card-custom">
+    <?php if (isset($_GET['success'])): ?>
+        <div style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+            <?= htmlspecialchars($_GET['success']) ?>
+        </div>
+    <?php endif; ?>
+    <?php if (isset($_GET['error'])): ?>
+        <div style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+            <?= htmlspecialchars($_GET['error']) ?>
+        </div>
+    <?php endif; ?>
+
     <div class="table-controls">
         <div class="filter-group">
             <label for="statusFilter" style="font-weight: 500; color: #555;">Filter Status:</label>
@@ -92,7 +122,7 @@ require_once __DIR__ . '/../layouts/header.php';
             </select>
         </div>
         <button class="btn-primary" id="openTaskModalBtn">
-            <i class="bx bx-plus"></i> Add New Task
+            <i class="bx bx-plus"></i> Add Task
         </button>
     </div>
 
@@ -109,16 +139,15 @@ require_once __DIR__ . '/../layouts/header.php';
       <tbody>
         <?php if ($result && $result->num_rows > 0): ?>
             <?php while($row = $result->fetch_assoc()): 
-                // Determine CSS class based on status
-                $statusClass = 'pending'; // Default
+                $statusClass = 'pending';
                 if (trim($row["task_status"]) === 'In Progress') $statusClass = 'in-progress';
                 if (trim($row["task_status"]) === 'Done' || trim($row["task_status"]) === 'Completed') $statusClass = 'done';
             ?>
                 <tr>
                     <td><strong><?= htmlspecialchars($row["full_name"]) ?></strong></td>
                     <td>
-                        <div style="font-size:13px; color:#666;">ID: <?= htmlspecialchars($row["machine_id"]) ?></div>
-                        <div>Bin: <?= htmlspecialchars($row["bin_id"]) ?></div>
+                        <div style="font-size:14px; font-weight:600; color:#333;"><?= htmlspecialchars($row["machine_name"] ?? 'Unknown Machine') ?></div>
+                        <div style="font-size:13px; color:#666;"><?= htmlspecialchars($row["bin_type"] ?? 'Unknown Bin') ?></div>
                     </td>
                     <td><?= htmlspecialchars($row["task_description"]) ?></td>
                     <td><span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars(trim($row["task_status"])) ?></span></td>
@@ -141,17 +170,29 @@ require_once __DIR__ . '/../layouts/header.php';
     </div>
     <?php endif; ?>
   </div>
-</main> <div id="taskModal" class="custom-modal">
+</main> 
+
+<div id="taskModal" class="custom-modal">
   <form id="addTasksForm" method="post" action="/controllers/Actions/add_tasks.php" class="modal-form">
     <h2>Add Task</h2>
     <select name="user_id" required>
       <option value="">-- Select Staff Member --</option>
       <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user['user_id']) . '">' . htmlspecialchars($user['full_name']) . '</option>'; } ?>
     </select>
+    
     <div style="display:flex; gap:12px;">
-        <input type="text" id="machine_id" name="machine_id" placeholder="Machine ID" required style="flex:1;">
-        <input type="text" id="bin_id" name="bin_id" placeholder="Bin ID" required style="flex:1;">
+        <select id="machine_id" name="machine_id" required style="flex:1;">
+            <option value="">-- Select Machine --</option>
+            <?php foreach($machines as $machine): ?>
+                <option value="<?= htmlspecialchars($machine['machine_id']) ?>"><?= htmlspecialchars($machine['machine_name']) ?></option>
+            <?php endforeach; ?>
+        </select>
+
+        <select id="bin_id" name="bin_id" required style="flex:1;">
+            <option value="">-- Select Bin --</option>
+            </select>
     </div>
+    
     <textarea id="task_description" name="task_description" rows="3" placeholder="Task Description" required></textarea>
     <select id="status" name="status" required>
       <option value="">-- Select Status --</option>
@@ -171,12 +212,43 @@ require_once __DIR__ . '/../layouts/header.php';
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const taskModal = document.getElementById('taskModal');
+  const machineSelect = document.getElementById('machine_id');
+  const binSelect = document.getElementById('bin_id');
   
+  // Pass PHP bins array to JS
+  const allBins = <?= json_encode($bins) ?>;
+
+  // Handle Cascading Dropdown functionality
+  machineSelect.addEventListener('change', function() {
+      const selectedMachineId = this.value;
+      
+      // Reset Bin dropdown
+      binSelect.innerHTML = '<option value="">-- Select Bin --</option>';
+      
+      if (selectedMachineId) {
+          // Filter bins matching the selected machine
+          const filteredBins = allBins.filter(bin => bin.machine_id == selectedMachineId);
+          
+          if(filteredBins.length === 0) {
+              binSelect.innerHTML = '<option value="">No Bins Available</option>';
+          } else {
+              // Add matched bins to the dropdown
+              filteredBins.forEach(bin => {
+                  const option = document.createElement('option');
+                  option.value = bin.bin_id;
+                  option.textContent = bin.bin_type; 
+                  binSelect.appendChild(option);
+              });
+          }
+      }
+  });
+
   document.getElementById('openTaskModalBtn').onclick = () => taskModal.style.display = 'flex';
   
   document.getElementById('closeTaskModalBtn').onclick = () => { 
       taskModal.style.display = 'none'; 
-      document.getElementById('addTasksForm').reset(); 
+      document.getElementById('addTasksForm').reset();
+      binSelect.innerHTML = '<option value="">-- Select Bin --</option>'; // Reset dropdown on close
   };
 });
 </script>

@@ -71,6 +71,24 @@ if ($userResult && $userResult->num_rows > 0) {
     }
 }
 
+// Fetch Machines for Modal dropdown
+$machines = [];
+$machineResult = $conn->query("SELECT machine_id, machine_name FROM machines ORDER BY machine_name ASC");
+if ($machineResult && $machineResult->num_rows > 0) {
+    while($row = $machineResult->fetch_assoc()) {
+        $machines[] = $row;
+    }
+}
+
+// Fetch Bins to feed to our Javascript
+$bins = [];
+$binResult = $conn->query("SELECT bin_id, machine_id, bin_type FROM trash_bins ORDER BY bin_type ASC");
+if ($binResult && $binResult->num_rows > 0) {
+    while($row = $binResult->fetch_assoc()) {
+        $bins[] = $row;
+    }
+}
+
 // ---------------------------------------------------------
 // PAGE SETUP
 // ---------------------------------------------------------
@@ -203,7 +221,7 @@ require_once __DIR__ . '/../layouts/header.php';
           <thead>
               <tr>
               <th class="sortable" onclick="sortTable('dashTaskTable', 0)">User <i class='bx bx-sort sort-icon'></i></th>
-              <th class="sortable" onclick="sortTable('dashTaskTable', 1)">Bin ID <i class='bx bx-sort sort-icon'></i></th>
+              <th class="sortable" onclick="sortTable('dashTaskTable', 1)">Kiosk / Bin <i class='bx bx-sort sort-icon'></i></th>
               <th class="sortable" onclick="sortTable('dashTaskTable', 2)">Task <i class='bx bx-sort sort-icon'></i></th>
               <th class="sortable" onclick="sortTable('dashTaskTable', 3)">Status <i class='bx bx-sort sort-icon'></i></th>
               <th class="sortable" onclick="sortTable('dashTaskTable', 4, true)">Created At <i class='bx bx-sort sort-icon'></i></th>
@@ -211,10 +229,16 @@ require_once __DIR__ . '/../layouts/header.php';
           </thead>
           <tbody>
               <?php
-              $sql = "SELECT users.full_name, tasks.bin_id, tasks.task_description, tasks.task_status, tasks.created_at 
-                      FROM tasks JOIN users ON tasks.user_id = users.user_id 
+              // Updated SQL to join machines and trash_bins
+              $sql = "SELECT users.full_name, tasks.task_description, tasks.task_status, tasks.created_at, 
+                             machines.machine_name, trash_bins.bin_type 
+                      FROM tasks 
+                      JOIN users ON tasks.user_id = users.user_id 
+                      LEFT JOIN machines ON tasks.machine_id = machines.machine_id
+                      LEFT JOIN trash_bins ON tasks.bin_id = trash_bins.bin_id
                       ORDER BY tasks.created_at DESC LIMIT 50";
               $result = $conn->query($sql);
+              
               if ($result && $result->num_rows > 0) {
                   while ($row = $result->fetch_assoc()) {
                       $timestamp = strtotime($row["created_at"]);
@@ -225,7 +249,13 @@ require_once __DIR__ . '/../layouts/header.php';
 
                       echo '<tr>';
                       echo '<td><strong>' . htmlspecialchars($row["full_name"]) . '</strong></td>';
-                      echo '<td>Bin: ' . htmlspecialchars($row["bin_id"]) . '</td>';
+                      
+                      // Output nicely formatted Kiosk and Bin names
+                      echo '<td>
+                                <div style="font-size:14px; font-weight:600; color:#333;">' . htmlspecialchars($row["machine_name"] ?? 'Unknown Machine') . '</div>
+                                <div style="font-size:13px; color:#666;">' . htmlspecialchars($row["bin_type"] ?? 'Unknown Bin') . '</div>
+                            </td>';
+                            
                       echo '<td>' . htmlspecialchars($row["task_description"]) . '</td>';
                       
                       // Status Badge coloring inline
@@ -251,18 +281,49 @@ require_once __DIR__ . '/../layouts/header.php';
 </main>
 
 <div id="scheduleModal" class="custom-modal">
-  <form id="addScheduleForm" method="post" action="/controllers/Actions/add_schedule.php" class="modal-form">
-    <h2>Add Schedule</h2>
-    <select name="user_id" required>
-      <option value="">-- Select User --</option>
-      <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user["user_id"]) . '">' . htmlspecialchars($user["full_name"]) . '</option>'; } ?>
-    </select>
-    <input type="text" name="floor_level" placeholder="Floor Level" required>
-    <input type="text" name="task_description" placeholder="Task Description" required>
-    <input type="date" name="schedule_date" required>
-    <div class="modal-actions">
-      <button type="submit" class="empty-btn" style="justify-content:center;">Save Schedule</button>
-      <button type="button" class="cancel-btn" id="closeScheduleModalBtn">Cancel</button>
+  <form id="addScheduleForm" method="post" action="/controllers/Actions/add_schedule.php" class="modal-form" style="padding: 24px; border-radius: 12px; width: 100%; max-width: 420px; gap: 16px; display: flex; flex-direction: column;">
+    <h2 style="margin: 0 0 10px 0; font-size: 22px; color: #333;">Add Schedule</h2>
+    
+    <div>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Assign Staff <span style="color:red;">*</span></label>
+        <select name="user_id" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
+          <option value="">-- Select Staff Member --</option>
+          <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user["user_id"]) . '">' . htmlspecialchars($user["full_name"]) . '</option>'; } ?>
+        </select>
+    </div>
+    
+    <div>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Floor Level <span style="color:red;">*</span></label>
+        <select name="floor_level" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
+          <option value="">-- Select Floor Level --</option>
+          <option value="1st Floor">1st Floor</option>
+          <option value="2nd Floor">2nd Floor</option>
+          <option value="3rd Floor">3rd Floor</option>
+        </select>
+    </div>
+
+    <div>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Task Description <span style="color:red;">*</span></label>
+        <input type="text" list="commonTasks" name="task_description" placeholder="Select from list or type a custom task..." required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa;">
+        <datalist id="commonTasks">
+            <option value="Empty All Bins">
+            <option value="Perform Routine Maintenance">
+            <option value="Clean Kiosk Area">
+            <option value="Inspect Sensors">
+        </datalist>
+        <small style="color: #888; font-size: 12px; margin-top: 6px; display: block;">
+            <i class='bx bx-info-circle'></i> Double-click the input box to see common tasks.
+        </small>
+    </div>
+
+    <div>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Schedule Date <span style="color:red;">*</span></label>
+        <input type="date" name="schedule_date" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
+    </div>
+
+    <div class="modal-actions" style="display: flex; gap: 12px; margin-top: 10px;">
+      <button type="submit" class="btn-primary" style="flex: 1; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Save Schedule</button>
+      <button type="button" class="cancel-btn" id="closeScheduleModalBtn" style="flex: 1; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; background: #f1f1f1; color: #333; border: none; cursor: pointer;">Cancel</button>
     </div>
   </form>
 </div>
@@ -271,13 +332,23 @@ require_once __DIR__ . '/../layouts/header.php';
   <form id="addTasksForm" method="post" action="/controllers/Actions/add_tasks.php" class="modal-form">
     <h2>Add Task</h2>
     <select name="user_id" required>
-      <option value="">-- Select User --</option>
+      <option value="">-- Select Staff Member --</option>
       <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user['user_id']) . '">' . htmlspecialchars($user['full_name']) . '</option>'; } ?>
     </select>
+    
     <div style="display:flex; gap:12px;">
-      <input type="text" id="machine_id" name="machine_id" placeholder="Machine ID" required style="flex:1;">
-      <input type="text" id="bin_id" name="bin_id" placeholder="Bin ID" required style="flex:1;">
+      <select id="machine_id" name="machine_id" required style="flex:1;">
+          <option value="">-- Select Machine --</option>
+          <?php foreach($machines as $machine): ?>
+              <option value="<?= htmlspecialchars($machine['machine_id']) ?>"><?= htmlspecialchars($machine['machine_name']) ?></option>
+          <?php endforeach; ?>
+      </select>
+
+      <select id="bin_id" name="bin_id" required style="flex:1;">
+          <option value="">-- Select Bin --</option>
+          </select>
     </div>
+    
     <textarea id="task_description" name="task_description" rows="3" placeholder="Task Description" required></textarea>
     <select id="status" name="status" required>
       <option value="">-- Select Status --</option>
@@ -321,12 +392,41 @@ function switchTab(evt, tabId) {
 document.addEventListener('DOMContentLoaded', function() {
   const scheduleModal = document.getElementById('scheduleModal');
   const taskModal = document.getElementById('taskModal');
+  
+  // Elements for Dynamic Dropdown
+  const machineSelect = document.getElementById('machine_id');
+  const binSelect = document.getElementById('bin_id');
+  const allBins = <?= json_encode($bins) ?>;
 
   document.getElementById('openScheduleModalBtn').onclick = () => scheduleModal.style.display = 'flex';
   document.getElementById('closeScheduleModalBtn').onclick = () => { scheduleModal.style.display = 'none'; document.getElementById('addScheduleForm').reset(); };
   
   document.getElementById('openTaskModalBtn').onclick = () => taskModal.style.display = 'flex';
-  document.getElementById('closeTaskModalBtn').onclick = () => { taskModal.style.display = 'none'; document.getElementById('addTasksForm').reset(); };
+  document.getElementById('closeTaskModalBtn').onclick = () => { 
+      taskModal.style.display = 'none'; 
+      document.getElementById('addTasksForm').reset(); 
+      binSelect.innerHTML = '<option value="">-- Select Bin --</option>'; // Reset dropdown on close
+  };
+
+  // Handle Cascading Dropdown functionality for Tasks
+  machineSelect.addEventListener('change', function() {
+      const selectedMachineId = this.value;
+      binSelect.innerHTML = '<option value="">-- Select Bin --</option>';
+      
+      if (selectedMachineId) {
+          const filteredBins = allBins.filter(bin => bin.machine_id == selectedMachineId);
+          if(filteredBins.length === 0) {
+              binSelect.innerHTML = '<option value="">No Bins Available</option>';
+          } else {
+              filteredBins.forEach(bin => {
+                  const option = document.createElement('option');
+                  option.value = bin.bin_id;
+                  option.textContent = bin.bin_type; 
+                  binSelect.appendChild(option);
+              });
+          }
+      }
+  });
 
   // Live Bin Data
   async function fetchLiveBinData() {
