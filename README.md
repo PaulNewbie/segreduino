@@ -61,28 +61,21 @@ segreduino/
 ├── esp32_test_log.txt      # IoT hardware communication logs
 └── README.md               # Project documentation
 
-
+```
 ⚙️ Installation & Setup
 
-    Clone or Download the Repository:
-    Place the project folder into your local web server directory (e.g., htdocs for XAMPP or www for WAMP).
+Clone or Download the Repository:
+* Place the project folder into your local web server directory (e.g., htdocs for XAMPP or www for WAMP).
 
-    Database Setup:
+Database Setup:
+* Open your MySQL database manager (e.g., phpMyAdmin).
+* Create a new database (e.g., smart_waste_management).
+* Import the provided SQL file located at db_backup/smart_waste_management.sql.
 
-        Open your MySQL database manager (e.g., phpMyAdmin).
+Configure Environment:
+* Navigate to src/config/config.php.
+* Update the database connection credentials (host, dbname, username, password) to match your local setup.
 
-        Create a new database (e.g., smart_waste_management).
-
-        Import the provided SQL file located at db_backup/smart_waste_management.sql.
-
-    Configure Environment:
-
-        Navigate to src/config/config.php.
-
-        Update the database connection credentials (host, dbname, username, password) to match your local setup.
-
-    Run the Application:
-
-        Start your Apache and MySQL servers.
-
-        Open your browser and navigate to http://localhost/segreduino (or your corresponding local path).
+Run the Application:
+* Start your Apache and MySQL servers.
+* Open your browser and navigate to http://localhost/segreduino (or your corresponding local path).
