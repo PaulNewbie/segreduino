@@ -166,10 +166,10 @@ require_once __DIR__ . '/../layouts/header.php';
         <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Floor Level <span style="color:red;">*</span></label>
         <select name="floor_level" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
           <option value="">-- Select Floor Level --</option>
-          <option value="1st Floor">1st Floor</option>
-          <option value="2nd Floor">2nd Floor</option>
-          <option value="3rd Floor">3rd Floor</option>
-        </select>
+          <option value="1st">1st Floor</option>
+          <option value="2nd">2nd Floor</option>
+          <option value="3rd">3rd Floor</option>
+        </select>    
     </div>
 
     <div>

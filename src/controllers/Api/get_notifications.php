@@ -13,7 +13,7 @@ $sql = "SELECT n.id, n.message, n.type, n.status, n.created_at,
                t.task_description,
                u.full_name AS staff_name
         FROM notifications n
-        LEFT JOIN tasks t ON n.task_id = t.id
+        LEFT JOIN tasks t ON n.task_id = t.task_id
         LEFT JOIN users u ON t.user_id = u.user_id 
         WHERE n.status = 'unread'
         ORDER BY n.created_at DESC
@@ -33,6 +33,7 @@ if ($result && $result->num_rows > 0) {
         elseif ($diff->i > 0)  $time = $diff->i.' minutes ago';
         else                   $time = 'Just now';
 
+// ... inside the while loop
         switch ($row['type']) {
             case 'task_completed':
                 $message = "{$row['staff_name']} completed: {$row['task_description']}";
@@ -48,9 +49,11 @@ if ($result && $result->num_rows > 0) {
         }
 
         $notifications[] = [
-            'id'   => $row['id'],
-            'msg'  => $message,
-            'time' => $time
+            'id'          => $row['id'],
+            'msg'         => $message,
+            'time'        => $time,
+            'type'        => $row['type'],       // Added for UI styling
+            'raw_message' => $row['message']     // Added to get the exact Bin name
         ];
     }
 }

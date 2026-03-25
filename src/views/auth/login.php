@@ -14,7 +14,8 @@ if (isset($_POST['username'], $_POST['password'])) {
     // Import the database connection
     require_once __DIR__ . '/../../config/config.php';
 
-    $stmt = $conn->prepare("SELECT id, username, password FROM admin_users WHERE username = ? OR email = ? LIMIT 1");
+    // CHANGE 1: Added 'email' to the SELECT query
+    $stmt = $conn->prepare("SELECT id, username, email, password, avatar FROM admin_users WHERE username = ? OR email = ? LIMIT 1");
     $stmt->bind_param("ss", $input_username, $input_email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -23,7 +24,12 @@ if (isset($_POST['username'], $_POST['password'])) {
         $user = $result->fetch_assoc();
         
         if (password_verify($input_password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id']; 
             $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email']; 
+            // 👇 ADD THIS LINE 👇
+            $_SESSION['avatar'] = $user['avatar']; 
+
             // Since we are routing through index.php now, redirect to the clean URL
             header('Location: /dashboard.php');
             exit;

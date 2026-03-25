@@ -1,54 +1,77 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../../config/config.php';
 
-// Handle preflight request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
+// Check if it's a web form submission
+$isWeb = isset($_POST['source']) && $_POST['source'] === 'web';
 
-try {
-    // ✅ Connect to your hosting database
-    require_once __DIR__ . '/../../config/config.php';
+// ==========================================
+// 1. HANDLE FLUTTER APP REQUEST (JSON)
+// ==========================================
+$inputJSON = file_get_contents('php://input');
+$input = json_decode($inputJSON, TRUE);
 
-    if ($conn->connect_error) {
-        throw new Exception("Connection failed: " . $conn->connect_error);
-    }
+if (!empty($input)) {
+    header("Content-Type: application/json; charset=UTF-8");
+    
+    $email = trim($input['email'] ?? '');
+    $fullName = trim($input['full_name'] ?? '');
+    $phone = trim($input['phone'] ?? '');
 
-    // Get raw POST data
-    $input = json_decode(file_get_contents("php://input"), true);
-
-    $email = $conn->real_escape_string($input['email'] ?? '');
-    $full_name = $conn->real_escape_string($input['full_name'] ?? '');
-    $phone = $conn->real_escape_string($input['phone'] ?? '');
-
-    if (empty($email) || empty($full_name)) {
+    if (empty($email) || empty($fullName)) {
         echo json_encode(["success" => false, "message" => "Email and full name are required."]);
-        exit();
+        exit;
     }
 
-    // ✅ Use prepared statement (secure)
     $stmt = $conn->prepare("UPDATE users SET full_name = ?, phone = ? WHERE email = ?");
-    if (!$stmt) {
-        throw new Exception("Prepare failed: " . $conn->error);
-    }
-
-    $stmt->bind_param("sss", $full_name, $phone, $email);
+    $stmt->bind_param("sss", $fullName, $phone, $email);
 
     if ($stmt->execute()) {
         echo json_encode(["success" => true, "message" => "Profile updated successfully."]);
     } else {
-        throw new Exception("Execute failed: " . $stmt->error);
+        echo json_encode(["success" => false, "message" => "Failed to update profile."]);
+    }
+    $stmt->close();
+    exit;
+}
+
+// ==========================================
+// 2. HANDLE WEB DASHBOARD REQUEST (POST Form)
+// ==========================================
+if ($isWeb) {
+    if (!isset($_SESSION['user_id'])) {
+        die("Unauthorized. Please log in.");
+    }
+    
+    $userId = $_SESSION['user_id'];
+    $firstName = trim($_POST['first_name'] ?? '');
+    $lastName = trim($_POST['last_name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+
+    if (empty($firstName) || empty($lastName) || empty($email)) {
+        $_SESSION['error_msg'] = "First name, last name, and email are required.";
+        header("Location: /profile.php");
+        exit;
     }
 
-    $stmt->close();
-    
+    // Update the admin_users table for web users
+    $stmt = $conn->prepare("UPDATE admin_users SET first_name = ?, last_name = ?, email = ? WHERE id = ?");
+    $stmt->bind_param("sssi", $firstName, $lastName, $email, $userId);
 
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(["success" => false, "message" => $e->getMessage()]);
-    exit();
+    if ($stmt->execute()) {
+        // Update the session email so the UI doesn't break if they use email to log in
+        $_SESSION['email'] = $email; 
+        
+        $_SESSION['success_msg'] = "Personal information updated successfully.";
+        header("Location: /profile.php");
+        exit;
+    } else {
+        $_SESSION['error_msg'] = "Failed to update profile information.";
+        header("Location: /profile.php");
+        exit;
+    }
 }
+
+// If neither format matches
+http_response_code(400);
+echo "Invalid request format.";

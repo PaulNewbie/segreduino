@@ -55,7 +55,11 @@
       </div>
       
       <div class="profile" id="profileWrapper" style="position: relative; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-        <img src="/assets/img/pdm logo.jfif" alt="profile" id="profileIcon" />
+        <?php 
+            // Check if the session has an avatar, otherwise use the default logo
+            $navAvatar = !empty($_SESSION['avatar']) ? htmlspecialchars($_SESSION['avatar']) : '/assets/img/pdm logo.jfif'; 
+        ?>
+        <img id="profileIcon" src="<?= $navAvatar ?>" alt="Profile" style="object-fit: cover; border-radius: 50%;">
         
         <ul class="profile-dropdown" id="profileDropdown">
             <li><a href="/profile.php"><i class='bx bx-user'></i> My Profile</a></li>
