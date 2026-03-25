@@ -301,7 +301,6 @@ require_once __DIR__ . '/../layouts/header.php';
           <option value="3rd">3rd Floor</option>
         </select>    
     </div>
-    </div>
 
     <div>
         <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Task Description <span style="color:red;">*</span></label>

@@ -1,42 +1,88 @@
-# AdminHub Dashboard
+# Segreduino - Smart Waste Management System
 
-Welcome to the AdminHub Dashboard repository!
+Segreduino is a web-based smart waste management and segregation system integrated with IoT. It provides a centralized dashboard to monitor trash bins, manage kiosks/machines, track tasks, and handle waste collection schedules.
 
-AdminHub Dashboard is a sleek and modern dashboard design created using HTML, CSS, and JavaScript. This repository contains the source code for the AdminHub Dashboard.
+## 🚀 Features
 
-## Features
+* **IoT Integration:** Interfaces with ESP32 microcontrollers for hardware monitoring and Arduino Mega as main component.
+* **Real-time Dashboard:** Monitor the status of bins, machines, and kiosks.
+* **Task & Schedule Management:** Add, edit, and mark daily waste management tasks and schedules as done.
+* **User Authentication:** Secure login, registration, password resets (via PHPMailer), and Facebook Login API integration.
+* **User Roles & Profiles:** Manage user profiles, avatars, and settings.
+* **Alerts & History:** Track system notifications and historical waste data.
 
-- Responsive layout for desktop and mobile devices
-- Elegant design with intuitive navigation
-- Charts and graphs for data visualization
-- Customizable and easy to integrate into web applications
+## 🛠️ Tech Stack
 
-## Preview
+* **Backend:** PHP
+* **Frontend:** HTML, CSS, JavaScript
+* **Database:** MySQL
+* **Third-Party Integrations:** PHPMailer (Email Verification/Reset), Facebook Login API
 
-![AdminHub Dashboard Preview](dashboard-preview.png)
+## 📂 Directory Structure
 
-## Getting Started
+```text
+segreduino/
+├── assets/                 # Frontend assets (CSS, Images, JS)
+├── db_backup/              # Database schema and backup files
+│   └── smart_waste_management.sql
+├── src/                    # Main application source code
+│   ├── config/             # Database and application configuration files
+│   ├── controllers/        # Backend logic (Actions/ for CRUD, Api/ for endpoints)
+│   ├── utils/              # Helper functions (e.g., password hashing)
+│   ├── vendor/             # Third-party libraries (PHPMailer)
+│   └── views/              # UI components and pages
+│       ├── auth/           # Authentication interfaces
+│       │   ├── admin_reset_password.php
+│       │   ├── forgot_password.php
+│       │   ├── login.php
+│       │   ├── logout.php
+│       │   ├── register.php
+│       │   └── verify_code.php
+│       ├── layouts/        # Reusable UI parts
+│       │   ├── footer.php
+│       │   ├── header.php
+│       │   └── sidebar.php
+│       ├── Legal/          # Legal and compliance pages
+│       │   ├── delete-data.html
+│       │   ├── privacy-policy.html
+│       │   └── terms.html
+│       └── pages/          # Main dashboard views
+│           ├── bin.php
+│           ├── dashboard.php
+│           ├── history.php
+│           ├── notifications.php
+│           ├── profile.php
+│           ├── schedules.php
+│           ├── settings.php
+│           ├── tasks.php
+│           └── user.php
+├── .htaccess               # Apache configuration / routing rules
+├── index.php               # Application entry point
+├── esp32_test_log.txt      # IoT hardware communication logs
+└── README.md               # Project documentation
 
-To get started with AdminHub Dashboard, follow these steps:
 
-1. Clone this repository: `git clone https://github.com/fajarnurwahid/adminhub.git`
-2. Open the `index.html` file in your web browser to view the dashboard.
+⚙️ Installation & Setup
 
-## Technologies Used
+    Clone or Download the Repository:
+    Place the project folder into your local web server directory (e.g., htdocs for XAMPP or www for WAMP).
 
-- HTML
-- CSS
-- JavaScript
+    Database Setup:
 
-## Contributing
+        Open your MySQL database manager (e.g., phpMyAdmin).
 
-Contributions are welcome! If you have any suggestions, improvements, or bug fixes, feel free to open an issue or submit a pull request.
+        Create a new database (e.g., smart_waste_management).
 
-## License
+        Import the provided SQL file located at db_backup/smart_waste_management.sql.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+    Configure Environment:
 
-## Acknowledgements
+        Navigate to src/config/config.php.
 
-Special thanks to [Fajarnurwahid](https://github.com/fajarnurwahid) for creating and sharing the AdminHub Dashboard.
+        Update the database connection credentials (host, dbname, username, password) to match your local setup.
 
+    Run the Application:
+
+        Start your Apache and MySQL servers.
+
+        Open your browser and navigate to http://localhost/segreduino (or your corresponding local path).
