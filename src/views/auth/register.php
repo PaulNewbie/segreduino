@@ -1,6 +1,5 @@
 <?php
 // views/auth/register.php
-session_start();
 
 require_once __DIR__ . '/../../config/config.php';
 if ($conn->connect_error) {

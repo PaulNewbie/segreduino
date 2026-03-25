@@ -80,6 +80,14 @@ switch ($request) {
         require __DIR__ . '/src/views/auth/logout.php';
         break;
 
+    // TEST PAGES FOR ESP32
+    case '/test_endpoint.php':
+        require __DIR__ . '/test_endpoint.php';
+        break;
+    case '/test_view.php':
+        require __DIR__ . '/test_view.php';
+        break;
+
     default:
         http_response_code(404);
         echo "<h1 style='text-align:center; margin-top:50px; font-family:sans-serif;'>404 - Page Not Found</h1>";

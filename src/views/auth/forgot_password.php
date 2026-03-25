@@ -1,6 +1,6 @@
 <?php
 // views/auth/forgot_password.php
-session_start();
+
 
 // Make sure PHPMailer paths are correct relative to the new structure
 require_once __DIR__ . '/../../vendor/PHPMailer/src/PHPMailer.php';
