@@ -1,6 +1,4 @@
 <?php
-
-
 // Ensure user is logged in
 if (!isset($_SESSION['username'])) {
     header('Location: /login.php');
@@ -19,7 +17,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $bin_id = filter_input(INPUT_POST, 'bin_id', FILTER_VALIDATE_INT);
     
     $task_description = trim($_POST['task_description'] ?? '');
-    $task_status = trim($_POST['status'] ?? '');
+    // $task_status = trim($_POST['status'] ?? '');
+    // Status reworking
+    $raw_status = trim($_POST['status'] ?? '');
+
+    // Map the values from the HTML dropdown to your exact database ENUMs
+    $status_mapping = [
+        'Pending'     => 'pending',
+        'In Progress' => 'in_progress',
+        'Done'        => 'completed',
+        // Fallbacks just in case the HTML was already changed:
+        'pending'     => 'pending',
+        'in_progress' => 'in_progress',
+        'completed'   => 'completed'
+    ];
+
+    // Apply the mapped value, default to 'pending' if somehow an unknown value is sent
+    $task_status = $status_mapping[$raw_status] ?? 'pending';
     $created_at = trim($_POST['created_at'] ?? '');
 
     // 2. Validate required fields

@@ -111,29 +111,39 @@ require_once __DIR__ . '/../layouts/header.php';
     <?php endif; ?>
 
     <div class="table-controls">
+        <input type="text" id="searchTask" class="filter-input search-bar" placeholder="Search user or bin..." onkeyup="runTaskFilter()">
+        
         <div class="filter-group">
-            <label for="statusFilter" style="font-weight: 500; color: #555;">Filter Status:</label>
-            <select id="statusFilter" class="filter-select" onchange="window.location.href='?status=' + encodeURIComponent(this.value)">
-                <option value="all" <?= strtolower($filter) === 'all' ? 'selected' : '' ?>>All Tasks</option>
-                <option value="Pending" <?= strtolower($filter) === 'pending' ? 'selected' : '' ?>>Pending</option>
-                <option value="In Progress" <?= strtolower($filter) === 'in progress' ? 'selected' : '' ?>>In Progress</option>
-                <option value="Done" <?= strtolower($filter) === 'done' ? 'selected' : '' ?>>Done</option>
-                <option value="Completed" <?= strtolower($filter) === 'completed' ? 'selected' : '' ?>>Completed</option>
+            <label style="font-size:14px; color:#555;">Status:</label>
+            <select id="statusTask" class="filter-select" onchange="runTaskFilter()">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="in progress">In Progress</option>
+                <option value="done">Done</option>
+                <option value="completed">Completed</option>
             </select>
         </div>
+
+        <div class="filter-group">
+            <label style="font-size:14px; color:#555;">Created:</label>
+            <input type="date" id="dateStartTask" class="filter-input" onchange="runTaskFilter()">
+            <span style="color:#888;">to</span>
+            <input type="date" id="dateEndTask" class="filter-input" onchange="runTaskFilter()">
+        </div>
+
         <button class="btn-primary" id="openTaskModalBtn">
             <i class="bx bx-plus"></i> Add Task
         </button>
     </div>
 
-    <table class="task-table">
+    <table class="task-table" id="taskTable">
       <thead>
         <tr>
-          <th>Assigned Staff</th>
-          <th>Kiosk / Bin</th>
-          <th>Task Description</th>
-          <th>Status</th>
-          <th>Date Created</th>
+          <th class="sortable" onclick="sortTable('taskTable', 0)">Assigned Staff <i class='bx bx-sort sort-icon'></i></th>
+          <th class="sortable" onclick="sortTable('taskTable', 1)">Kiosk / Bin <i class='bx bx-sort sort-icon'></i></th>
+          <th class="sortable" onclick="sortTable('taskTable', 2)">Task Description <i class='bx bx-sort sort-icon'></i></th>
+          <th class="sortable" onclick="sortTable('taskTable', 3)">Status <i class='bx bx-sort sort-icon'></i></th>
+          <th class="sortable" onclick="sortTable('taskTable', 4, true)">Date Created <i class='bx bx-sort sort-icon'></i></th>
         </tr>
       </thead>
       <tbody>
@@ -142,6 +152,9 @@ require_once __DIR__ . '/../layouts/header.php';
                 $statusClass = 'pending';
                 if (trim($row["task_status"]) === 'In Progress') $statusClass = 'in-progress';
                 if (trim($row["task_status"]) === 'Done' || trim($row["task_status"]) === 'Completed') $statusClass = 'done';
+                
+                // Add timestamp logic
+                $timestamp = strtotime($row["created_at"]);
             ?>
                 <tr>
                     <td><strong><?= htmlspecialchars($row["full_name"]) ?></strong></td>
@@ -151,7 +164,8 @@ require_once __DIR__ . '/../layouts/header.php';
                     </td>
                     <td><?= htmlspecialchars($row["task_description"]) ?></td>
                     <td><span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars(trim($row["task_status"])) ?></span></td>
-                    <td><?= htmlspecialchars(date('M d, Y g:i A', strtotime($row["created_at"]))) ?></td>
+                    
+                    <td data-time="<?= $timestamp ?>"><?= htmlspecialchars(date('M d, Y g:i A', $timestamp)) ?></td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
@@ -195,10 +209,10 @@ require_once __DIR__ . '/../layouts/header.php';
     
     <textarea id="task_description" name="task_description" rows="3" placeholder="Task Description" required></textarea>
     <select id="status" name="status" required>
-      <option value="">-- Select Status --</option>
-      <option value="Pending">Pending</option>
-      <option value="In Progress">In Progress</option>
-      <option value="Done">Done</option>
+        <option value="">-- Select Status --</option>
+        <option value="pending">Pending</option>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Done</option>
     </select>
     <input type="datetime-local" id="created_at" name="created_at" required>
     <div class="modal-actions">
@@ -209,7 +223,22 @@ require_once __DIR__ . '/../layouts/header.php';
 </div>
 
 <?php ob_start(); ?>
+
+<script src="/assets/js/table-utils.js"></script>
+
 <script>
+// Filter Setup for Tasks
+function runTaskFilter() {
+    filterGenericTable({
+        tableId: 'taskTable', 
+        searchId: 'searchTask', 
+        statusId: 'statusTask', 
+        statusCol: 3, 
+        startId: 'dateStartTask', 
+        endId: 'dateEndTask', 
+        timeCol: 4
+    });
+}
 document.addEventListener('DOMContentLoaded', function() {
   const taskModal = document.getElementById('taskModal');
   const machineSelect = document.getElementById('machine_id');

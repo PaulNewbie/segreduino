@@ -93,6 +93,15 @@ require_once __DIR__ . '/../layouts/header.php';
     <?php endif; ?>
 
     <div class="table-controls">
+        <input type="text" id="searchSched" class="filter-input search-bar" placeholder="Search user or task..." onkeyup="runSchedFilter()">
+        
+        <div class="filter-group">
+            <label style="font-size:14px; color:#555;">Date:</label>
+            <input type="date" id="dateStartSched" class="filter-input" onchange="runSchedFilter()">
+            <span style="color:#888;">to</span>
+            <input type="date" id="dateEndSched" class="filter-input" onchange="runSchedFilter()">
+        </div>
+
         <div class="filter-group">
             <label for="dateFilter" style="font-weight: 500; color: #555;">View:</label>
             <select id="dateFilter" class="filter-select" onchange="window.location.href='?filter='+this.value">
@@ -102,25 +111,28 @@ require_once __DIR__ . '/../layouts/header.php';
                 <option value="week" <?= $filter === 'week' ? 'selected' : '' ?>>This Week</option>
             </select>
         </div>
+
         <button class="btn-primary" id="openScheduleModalBtn">
             <i class="bx bx-plus"></i> Add New Schedule
         </button>
     </div>
 
-    <table class="schedule-table">
-      <thead>
-        <tr>
-          <th>Assigned Staff</th>
-          <th>Floor Level</th>
-          <th>Task</th>
-          <th>Date</th>
-          <th>Status</th>
-        </tr>
-      </thead>
+    <table class="schedule-table" id="schedTable">
+        <thead>
+            <tr>
+            <th class="sortable" onclick="sortTable('schedTable', 0)">Assigned Staff <i class='bx bx-sort sort-icon'></i></th>
+            <th class="sortable" onclick="sortTable('schedTable', 1)">Floor Level <i class='bx bx-sort sort-icon'></i></th>
+            <th class="sortable" onclick="sortTable('schedTable', 2)">Task <i class='bx bx-sort sort-icon'></i></th>
+            <th class="sortable" onclick="sortTable('schedTable', 3, true)">Date <i class='bx bx-sort sort-icon'></i></th>
+            <th>Status</th>
+            </tr>
+        </thead>
       <tbody>
         <?php if ($result && $result->num_rows > 0): ?>
             <?php while($row = $result->fetch_assoc()): 
-                $isPast = strtotime($row["schedule_date"]) < strtotime('today');
+                // Create a timestamp variable for the JS script to read
+                $timestamp = strtotime($row["schedule_date"]); 
+                $isPast = $timestamp < strtotime('today');
                 $statusClass = $isPast ? 'past' : 'upcoming';
                 $statusText = $isPast ? 'Past Due' : 'Upcoming';
             ?>
@@ -128,7 +140,9 @@ require_once __DIR__ . '/../layouts/header.php';
                     <td><strong><?= htmlspecialchars($row["full_name"]) ?></strong></td>
                     <td><?= htmlspecialchars($row["floor_level"]) ?></td>
                     <td><?= htmlspecialchars($row["task_description"]) ?></td>
-                    <td><?= htmlspecialchars(date('M d, Y', strtotime($row["schedule_date"]))) ?></td>
+                    
+                    <td data-time="<?= $timestamp ?>"><?= htmlspecialchars(date('M d, Y', $timestamp)) ?></td>
+                    
                     <td><span class="status-badge <?= $statusClass ?>"><?= $statusText ?></span></td>
                 </tr>
             <?php endwhile; ?>
@@ -199,7 +213,21 @@ require_once __DIR__ . '/../layouts/header.php';
 </div>
 
 <?php ob_start(); ?>
+
+<script src="/assets/js/table-utils.js"></script>
+
 <script>
+// Add the filter function pointing to column 3 (Date)
+function runSchedFilter() {
+    filterGenericTable({
+        tableId: 'schedTable', 
+        searchId: 'searchSched', 
+        startId: 'dateStartSched', 
+        endId: 'dateEndSched', 
+        timeCol: 3 
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const scheduleModal = document.getElementById('scheduleModal');
   document.getElementById('openScheduleModalBtn').onclick = () => scheduleModal.style.display = 'flex';
