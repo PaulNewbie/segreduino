@@ -1,5 +1,5 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
+if (session_status() === PHP_SESSION_NONE) ;
 require_once __DIR__ . '/../../config/config.php';
 
 // Check if it's a web form submission

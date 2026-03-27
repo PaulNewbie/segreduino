@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.1deb3
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:3306
--- Generation Time: Mar 07, 2026 at 06:18 AM
--- Server version: 11.8.3-MariaDB-log
--- PHP Version: 7.2.34
+-- Host: localhost:3305
+-- Generation Time: Mar 25, 2026 at 11:10 PM
+-- Server version: 8.0.45-0ubuntu0.24.04.1
+-- PHP Version: 8.3.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `u303252282_smart_waste`
+-- Database: `smart_waste_management`
 --
 
 -- --------------------------------------------------------
@@ -28,30 +28,33 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `admin_users` (
-  `id` int(11) NOT NULL,
-  `first_name` varchar(50) NOT NULL,
-  `last_name` varchar(50) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` enum('superadmin','admin','staff') DEFAULT 'admin',
-  `status` enum('active','inactive') DEFAULT 'active',
-  `verified` tinyint(1) DEFAULT 0,
-  `verification_code` varchar(6) DEFAULT NULL,
-  `reset_code` varchar(6) DEFAULT NULL,
+  `id` int NOT NULL,
+  `first_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` enum('superadmin','admin','staff') COLLATE utf8mb4_unicode_ci DEFAULT 'admin',
+  `status` enum('active','inactive') COLLATE utf8mb4_unicode_ci DEFAULT 'active',
+  `verified` tinyint(1) DEFAULT '0',
+  `verification_code` varchar(6) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reset_code` varchar(6) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `reset_code_expiry` datetime DEFAULT NULL,
   `last_login` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `avatar` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `admin_users`
 --
 
-INSERT INTO `admin_users` (`id`, `first_name`, `last_name`, `username`, `email`, `password`, `role`, `status`, `verified`, `verification_code`, `reset_code`, `reset_code_expiry`, `last_login`, `created_at`, `updated_at`) VALUES
-(2, 'Maureen', 'Amatorio', 'maureena_admin', 'amatoriomaureen31@gmail.com', '$2y$10$oBEenlHwyV5c/XJoGSlw.ueOwD40xInNm1a3tRHaCwOISVeqi1Kta', 'admin', 'active', 0, '405173', NULL, '2025-09-17 11:14:05', NULL, '2025-09-17 08:58:50', '2025-09-17 11:04:05'),
-(3, 'Honey', 'Dionisio', 'Honey_admin', 'dionisiohoneyshayne@gmail.com', '$2y$10$11zAbptHVtGvyS1/a1z1g.yxVrmNtDNL.ynOfuSV4QcuCr03IpfqC', 'admin', 'active', 0, NULL, NULL, NULL, NULL, '2025-09-24 06:00:52', '2025-09-24 06:00:52');
+INSERT INTO `admin_users` (`id`, `first_name`, `last_name`, `username`, `email`, `password`, `role`, `status`, `verified`, `verification_code`, `reset_code`, `reset_code_expiry`, `last_login`, `created_at`, `updated_at`, `avatar`) VALUES
+(2, 'Maureen', 'Amatorio', 'maureena_admin', 'amatoriomaureen31@gmail.com', '$2y$10$sGy.rR8OFKJLRBYlRS1txuYSWhoS/2u91SIU/6hLig/fGb0RpSIfK', 'admin', 'active', 0, '405173', NULL, '2025-09-17 11:14:05', NULL, '2025-09-17 08:58:50', '2026-03-07 08:21:40', NULL),
+(3, 'Honey', 'Dionisio', 'Honey_admin', 'dionisiohoneyshayne@gmail.com', '$2y$10$11zAbptHVtGvyS1/a1z1g.yxVrmNtDNL.ynOfuSV4QcuCr03IpfqC', 'admin', 'active', 0, NULL, NULL, NULL, NULL, '2025-09-24 06:00:52', '2025-09-24 06:00:52', NULL),
+(4, 'Paul John', 'Punzal', 'PaulPunzal', 'pjpunzal@gmail.com', '$2y$10$8tOR5hgXLzUUclTxwOkbke.3xGbUIgfg8R0BpYbRy/q95xOqugtRW', 'admin', 'active', 0, NULL, NULL, NULL, NULL, '2026-03-07 08:40:08', '2026-03-25 07:56:43', '/assets/img/avatars/admin_4_1774425403.png'),
+(5, 'John', 'Punzal', 'JohnPunzal', 'punzalpauljohn@gmail.com', '$2y$10$yvzfS1tux9S3IdU0348F/u3ZWNAlEZrJiJigoOqJJ1c8.uit3qJNe', 'admin', 'active', 0, '631878', NULL, '2026-03-14 12:32:47', NULL, '2026-03-14 12:07:05', '2026-03-14 12:22:47', NULL);
 
 -- --------------------------------------------------------
 
@@ -60,11 +63,11 @@ INSERT INTO `admin_users` (`id`, `first_name`, `last_name`, `username`, `email`,
 --
 
 CREATE TABLE `login_history` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
   `login_time` datetime NOT NULL,
-  `status` enum('success','failed') NOT NULL,
-  `ip_address` varchar(45) DEFAULT NULL
+  `status` enum('success','failed') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -101,7 +104,12 @@ INSERT INTO `login_history` (`id`, `user_id`, `login_time`, `status`, `ip_addres
 (27, 1, '2025-10-23 09:38:20', 'success', '119.93.86.7'),
 (28, 1, '2025-11-05 01:59:20', 'success', '216.247.95.131'),
 (29, 1, '2025-11-05 02:22:03', 'success', '216.247.95.131'),
-(30, 1, '2025-11-05 02:30:38', 'success', '216.247.95.131');
+(30, 1, '2025-11-05 02:30:38', 'success', '216.247.95.131'),
+(31, 0, '2026-03-19 08:25:44', 'failed', '192.168.100.209'),
+(32, 1, '2026-03-19 08:25:59', 'success', '192.168.100.209'),
+(33, 1, '2026-03-19 08:31:47', 'success', '192.168.100.235'),
+(34, 1, '2026-03-25 13:24:25', 'failed', '192.168.55.121'),
+(35, 1, '2026-03-25 13:24:32', 'success', '192.168.55.121');
 
 -- --------------------------------------------------------
 
@@ -110,17 +118,33 @@ INSERT INTO `login_history` (`id`, `user_id`, `login_time`, `status`, `ip_addres
 --
 
 CREATE TABLE `machines` (
-  `machine_id` int(11) NOT NULL,
+  `machine_id` int NOT NULL,
   `machine_name` varchar(100) NOT NULL,
   `location` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `machines`
 --
 
 INSERT INTO `machines` (`machine_id`, `machine_name`, `location`) VALUES
-(1, 'Machine 1', '1st Floor');
+(1, 'Machine 1', '1st Floor'),
+(8, 'Trashy', '2nd Floor');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id` int NOT NULL,
+  `task_id` int DEFAULT NULL,
+  `message` varchar(255) DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  `status` enum('unread','read') DEFAULT 'unread',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -129,14 +153,14 @@ INSERT INTO `machines` (`machine_id`, `machine_name`, `location`) VALUES
 --
 
 CREATE TABLE `schedules` (
-  `schedule_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `schedule_id` int NOT NULL,
+  `user_id` int NOT NULL,
   `floor_level` enum('1st','2nd','3rd') NOT NULL,
   `task_description` text NOT NULL,
   `schedule_date` date NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `moved_to_tasks` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `moved_to_tasks` tinyint(1) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `schedules`
@@ -146,7 +170,8 @@ INSERT INTO `schedules` (`schedule_id`, `user_id`, `floor_level`, `task_descript
 (1, 2, '1st', 'Collecting trash', '2025-06-23', '2025-06-22 03:47:02', 1),
 (5, 1, '1st', 'Clean the hallway', '2025-08-25', '2025-08-23 13:11:42', 1),
 (10, 1, '2nd', 'collect the trash in hallway', '2025-10-19', '2025-10-18 03:59:51', 1),
-(11, 1, '2nd', 'collect the trash in hallway', '2025-10-24', '2025-10-23 08:10:43', 1);
+(11, 1, '2nd', 'collect the trash in hallway', '2025-10-24', '2025-10-23 08:10:43', 1),
+(12, 1, '1st', 'test test', '2026-03-26', '2026-03-25 05:22:47', 0);
 
 -- --------------------------------------------------------
 
@@ -155,16 +180,16 @@ INSERT INTO `schedules` (`schedule_id`, `user_id`, `floor_level`, `task_descript
 --
 
 CREATE TABLE `tasks` (
-  `task_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `bin_id` int(11) NOT NULL,
-  `machine_id` int(11) NOT NULL,
+  `task_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `bin_id` int NOT NULL,
+  `machine_id` int NOT NULL,
   `task_description` text NOT NULL,
   `task_status` enum('pending','in_progress','completed') DEFAULT 'pending',
-  `created_at` datetime DEFAULT current_timestamp(),
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `status` varchar(10) DEFAULT 'Pending',
-  `assigned_to` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+  `assigned_to` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `tasks`
@@ -183,7 +208,11 @@ INSERT INTO `tasks` (`task_id`, `user_id`, `bin_id`, `machine_id`, `task_descrip
 (54, 5, 1, 1, 'vollect', 'pending', '2025-09-18 13:19:00', 'Pending', NULL),
 (55, 1, 1, 1, 'collect the trash in hallway', 'pending', '2025-10-19 00:00:00', 'Pending', NULL),
 (56, 1, 1, 1, 'collect the garabage bin because its full', 'pending', '2025-10-23 17:37:00', 'Pending', NULL),
-(57, 1, 1, 1, 'collect the trash in hallway', 'pending', '2025-10-24 00:00:00', 'Pending', NULL);
+(57, 1, 1, 1, 'collect the trash in hallway', 'completed', '2025-10-24 00:00:00', 'Pending', NULL),
+(59, 1, 1, 1, 'wala', 'completed', '1111-11-11 11:11:00', 'Pending', NULL),
+(61, 2, 1, 1, 'wlaa', 'pending', '1111-11-11 11:11:00', 'Pending', NULL),
+(62, 4, 1, 1, 'HELLO PAUL', 'pending', '1111-11-11 11:11:00', 'Pending', NULL),
+(63, 4, 1, 1, 'HELLOO WORLD', 'pending', '2222-02-22 22:22:00', 'Pending', NULL);
 
 -- --------------------------------------------------------
 
@@ -192,25 +221,26 @@ INSERT INTO `tasks` (`task_id`, `user_id`, `bin_id`, `machine_id`, `task_descrip
 --
 
 CREATE TABLE `trash_bins` (
-  `bin_id` int(11) NOT NULL,
-  `machine_id` int(11) DEFAULT NULL,
+  `bin_id` int NOT NULL,
+  `machine_id` int DEFAULT NULL,
   `floor_level` enum('1st','2nd','3rd') NOT NULL,
   `hallway_side` enum('left','right') NOT NULL,
-  `bin_status` enum('empty','almost full','full') DEFAULT 'empty',
-  `last_updated` datetime DEFAULT current_timestamp(),
+  `bin_status` int DEFAULT '0',
+  `last_updated` datetime DEFAULT CURRENT_TIMESTAMP,
   `bin_type` varchar(150) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `trash_bins`
 --
 
 INSERT INTO `trash_bins` (`bin_id`, `machine_id`, `floor_level`, `hallway_side`, `bin_status`, `last_updated`, `bin_type`) VALUES
-(1, 1, '1st', 'left', 'empty', '2025-06-22 00:19:16', 'BIODEGRADABLE'),
-(3, NULL, '2nd', 'left', 'empty', '2025-06-22 04:07:14', 'NON-BIODEGRADABLE'),
-(5, 1, '1st', 'left', 'empty', '2025-06-22 07:33:40', 'RECYCLABLE'),
-(6, NULL, '2nd', 'left', 'empty', '2025-06-22 08:03:03', 'BIODEGRADABLE'),
-(7, 1, '1st', 'left', 'empty', '2025-06-22 09:39:36', 'RECYCLABLE');
+(1, 1, '1st', 'left', 63, '2026-03-21 16:05:08', 'BIODEGRADABLE'),
+(3, NULL, '2nd', 'left', 1, '2025-06-22 04:07:14', 'NON-BIODEGRADABLE'),
+(5, 1, '1st', 'left', 1, '2025-06-22 07:33:40', 'RECYCLABLE'),
+(6, NULL, '2nd', 'left', 1, '2025-06-22 08:03:03', 'BIODEGRADABLE'),
+(7, 1, '1st', 'left', 1, '2025-06-22 09:39:36', 'RECYCLABLE'),
+(9, 8, '2nd', 'left', 0, '2026-03-15 07:29:03', 'RECYCLABLE');
 
 -- --------------------------------------------------------
 
@@ -219,26 +249,26 @@ INSERT INTO `trash_bins` (`bin_id`, `machine_id`, `floor_level`, `hallway_side`,
 --
 
 CREATE TABLE `users` (
-  `user_id` int(11) NOT NULL,
+  `user_id` int NOT NULL,
   `facebook_id` varchar(255) DEFAULT NULL,
   `full_name` varchar(100) NOT NULL,
   `username` varchar(50) NOT NULL,
   `role` varchar(20) DEFAULT 'user',
   `status` varchar(10) NOT NULL DEFAULT 'inactive',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `email` varchar(100) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   `reset_code` varchar(10) DEFAULT NULL,
   `reset_code_expiry` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`user_id`, `facebook_id`, `full_name`, `username`, `role`, `status`, `created_at`, `email`, `phone`, `password`, `reset_code`, `reset_code_expiry`) VALUES
-(1, NULL, 'Sierabel Barasan', 'shey@gmail.com', 'staff', 'active', '2025-06-21 18:32:56', 'shey@gmail.com', '09395568861', '$2y$10$QYcIj3p1PzSY5nNVqTHIn.HiQbPMwvHPoant4/zFx2slEh/x5weky', NULL, NULL),
+(1, NULL, 'Sierabel Barasan', 'shey@gmail.com', 'staff', 'active', '2025-06-21 18:32:56', 'shey@gmail.com', '09395568861', '$2y$10$rXAXLKB7Xojdrz39xdaR1egSBKkZlQwubW.sjDJa.G1/xlcINe57u', NULL, NULL),
 (2, '2185524528592171', 'Amatorio Maureen', 'ama@123', 'staff', 'active', '2025-06-21 18:51:51', 'maureenamatorio530@gmail.com', '09307527469', '$2y$10$bKJjDmFpNXqRN1w/mHd4Ke5m3zSmmIwoTVAy4nPVoHjk9Ju4AK0ba', NULL, NULL),
 (4, NULL, 'Julian Amatorio', 'Julian@123', 'staff', 'active', '2025-08-24 07:42:24', 'amatoriomaureen31@gmail.com', '09307527469', '$2y$10$g1VQv/4WbeOcCBs.WXjWM.cJSa9cJeOGuwqhifbICnglHVyYRlz9.', '356639', '2025-09-04 09:30:29'),
 (5, NULL, 'Shirley Cabusi', 'Cabusi@123', 'staff', 'active', '2025-09-04 11:57:18', 'cabusishirley@gmail.com', '09307527469', '$2y$10$YWutAvU8TTBXVC6IJbtPNeezwqPqT0abQvGy0lRMo1Kcfyu1oUMRy', NULL, NULL);
@@ -250,12 +280,12 @@ INSERT INTO `users` (`user_id`, `facebook_id`, `full_name`, `username`, `role`, 
 --
 
 CREATE TABLE `waste_disposal_log` (
-  `id` int(11) NOT NULL,
-  `disposal_time` datetime DEFAULT current_timestamp(),
+  `id` int NOT NULL,
+  `disposal_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `bin_type` enum('biodegradable','non-biodegradable','recyclable') NOT NULL,
   `waste_type` varchar(50) DEFAULT NULL,
-  `image_data` longblob DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+  `image_data` longblob
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `waste_disposal_log`
@@ -287,6 +317,12 @@ ALTER TABLE `login_history`
 --
 ALTER TABLE `machines`
   ADD PRIMARY KEY (`machine_id`);
+
+--
+-- Indexes for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `schedules`
@@ -335,49 +371,55 @@ ALTER TABLE `waste_disposal_log`
 -- AUTO_INCREMENT for table `admin_users`
 --
 ALTER TABLE `admin_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `login_history`
 --
 ALTER TABLE `login_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `machines`
 --
 ALTER TABLE `machines`
-  MODIFY `machine_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `machine_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `schedules`
 --
 ALTER TABLE `schedules`
-  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `schedule_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `task_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- AUTO_INCREMENT for table `trash_bins`
 --
 ALTER TABLE `trash_bins`
-  MODIFY `bin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `bin_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `user_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `waste_disposal_log`
 --
 ALTER TABLE `waste_disposal_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
