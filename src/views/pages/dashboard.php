@@ -239,18 +239,30 @@ require_once __DIR__ . '/../layouts/header.php';
                       ORDER BY tasks.created_at DESC LIMIT 50";
               $result = $conn->query($sql);
               
-              if ($result && $result->num_rows > 0) {
+                if ($result && $result->num_rows > 0) {
                   while ($row = $result->fetch_assoc()) {
                       $timestamp = strtotime($row["created_at"]);
                       
-                      $statusClass = 'pending'; 
-                      if (trim($row["task_status"]) === 'In Progress') $statusClass = 'in-progress';
-                      if (trim($row["task_status"]) === 'Done' || trim($row["task_status"]) === 'Completed') $statusClass = 'done';
+                      // Read the raw status from the database
+                      $rawStatus = strtolower(trim($row["task_status"]));
+                      $displayText = 'Pending';
+                      $bg = "#fff3e0"; // Default Orange background
+                      $txt = "#e65100"; // Default Orange text
+
+                      // Check for both new and old database formats and apply the right colors
+                      if ($rawStatus === 'in_progress' || $rawStatus === 'in progress') {
+                          $displayText = 'In Progress';
+                          $bg = "#e3f2fd"; // Blue background
+                          $txt = "#1565c0"; // Blue text
+                      } elseif ($rawStatus === 'completed' || $rawStatus === 'done') {
+                          $displayText = 'Completed';
+                          $bg = "#e8f5e9"; // Green background
+                          $txt = "#2e7d32"; // Green text
+                      }
 
                       echo '<tr>';
                       echo '<td><strong>' . htmlspecialchars($row["full_name"]) . '</strong></td>';
                       
-                      // Output nicely formatted Kiosk and Bin names
                       echo '<td>
                                 <div style="font-size:14px; font-weight:600; color:#333;">' . htmlspecialchars($row["machine_name"] ?? 'Unknown Machine') . '</div>
                                 <div style="font-size:13px; color:#666;">' . htmlspecialchars($row["bin_type"] ?? 'Unknown Bin') . '</div>
@@ -258,18 +270,14 @@ require_once __DIR__ . '/../layouts/header.php';
                             
                       echo '<td>' . htmlspecialchars($row["task_description"]) . '</td>';
                       
-                      // Status Badge coloring inline
-                      $bg = "#fff3e0"; $txt = "#e65100";
-                      if ($statusClass == 'in-progress') { $bg = "#e3f2fd"; $txt = "#1565c0"; }
-                      if ($statusClass == 'done') { $bg = "#e8f5e9"; $txt = "#2e7d32"; }
-
-                      echo '<td><span style="background:'.$bg.'; color:'.$txt.'; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">' . htmlspecialchars(trim($row["task_status"])) . '</span></td>';
+                      // Output the clean text with the correct inline colors
+                      echo '<td><span style="background:'.$bg.'; color:'.$txt.'; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">' . htmlspecialchars($displayText) . '</span></td>';
                       echo "<td data-time='$timestamp'>" . htmlspecialchars(date('M d, Y', $timestamp)) . '</td>';
                       echo '</tr>';
-                  }
-              } else {
-                  echo '<tr><td colspan="5" style="text-align:center; padding: 20px;">No recent tasks found</td></tr>';
-              }
+                    }
+                } else {
+                    echo '<tr><td colspan="5" style="text-align:center; padding: 20px;">No recent tasks found</td></tr>';
+                }
               ?>
           </tbody>
           </table>

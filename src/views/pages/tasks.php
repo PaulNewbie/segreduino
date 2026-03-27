@@ -149,12 +149,21 @@ require_once __DIR__ . '/../layouts/header.php';
       <tbody>
         <?php if ($result && $result->num_rows > 0): ?>
             <?php while($row = $result->fetch_assoc()): 
-                $statusClass = 'pending';
-                if (trim($row["task_status"]) === 'In Progress') $statusClass = 'in-progress';
-                if (trim($row["task_status"]) === 'Done' || trim($row["task_status"]) === 'Completed') $statusClass = 'done';
-                
-                // Add timestamp logic
                 $timestamp = strtotime($row["created_at"]);
+                
+                // Read the raw status from the database
+                $rawStatus = strtolower(trim($row["task_status"]));
+                $statusClass = 'pending';
+                $displayText = 'Pending';
+
+                // Check for both the new and old database formats
+                if ($rawStatus === 'in_progress' || $rawStatus === 'in progress') {
+                    $statusClass = 'in-progress'; // This triggers your blue CSS
+                    $displayText = 'In Progress'; // This formats the text cleanly
+                } elseif ($rawStatus === 'completed' || $rawStatus === 'done') {
+                    $statusClass = 'done';
+                    $displayText = 'Completed';
+                }
             ?>
                 <tr>
                     <td><strong><?= htmlspecialchars($row["full_name"]) ?></strong></td>
@@ -163,7 +172,8 @@ require_once __DIR__ . '/../layouts/header.php';
                         <div style="font-size:13px; color:#666;"><?= htmlspecialchars($row["bin_type"] ?? 'Unknown Bin') ?></div>
                     </td>
                     <td><?= htmlspecialchars($row["task_description"]) ?></td>
-                    <td><span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars(trim($row["task_status"])) ?></span></td>
+                    
+                    <td><span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars($displayText) ?></span></td>
                     
                     <td data-time="<?= $timestamp ?>"><?= htmlspecialchars(date('M d, Y g:i A', $timestamp)) ?></td>
                 </tr>
