@@ -19,9 +19,9 @@ header("Access-Control-Allow-Headers: Content-Type, Accept");
 header("Content-Type: application/json; charset=UTF-8");
 
 // --- Load PHPMailer ---
-require_once __DIR__ . '/PHPMailer/src/PHPMailer.php';
-require_once __DIR__ . '/PHPMailer/src/SMTP.php';
-require_once __DIR__ . '/PHPMailer/src/Exception.php';
+require_once __DIR__ . '/vendor/PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/vendor/PHPMailer/src/SMTP.php';
+require_once __DIR__ . '/vendor/PHPMailer/src/Exception.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -37,7 +37,7 @@ if (!$email) {
 }
 
 // --- DB connection ---
-require_once __DIR__ . "/config.php";
+require_once __DIR__ . "/config/config.php";
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
     exit;

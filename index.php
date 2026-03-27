@@ -79,6 +79,9 @@ switch ($request) {
     case '/logout.php':
         require __DIR__ . '/src/views/auth/logout.php';
         break;
+    case '/verification_email.php': // for mobile app password reset
+        require __DIR__ . '/src/verification_email.php';
+        break;
 
     // TEST PAGES FOR ESP32
     case '/test_endpoint.php':
