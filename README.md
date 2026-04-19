@@ -1,6 +1,6 @@
 # Segreduino — Smart Waste Management System
 
-Segreduino is a web-based smart waste management and segregation system integrated with IoT hardware. It provides a centralized dashboard to monitor trash bins, manage kiosks and machines, track tasks, and handle waste collection schedules — all communicating with ESP32 microcontrollers and an Arduino Mega as the primary hardware component.
+Segreduino is a web-based smart waste management and segregation system integrated with IoT hardware. It provides a centralized dashboard to monitor trash bins, manage kiosks and machines, track tasks, and handle waste collection schedules — all communicating \with ESP32 microcontrollers and an Arduino Mega as the primary hardware component.
 
 ---
 
