@@ -288,89 +288,8 @@ require_once __DIR__ . '/../layouts/header.php';
   </div>
 </main>
 
-<div id="scheduleModal" class="custom-modal">
-  <form id="addScheduleForm" method="post" action="/controllers/Actions/add_schedule.php" class="modal-form" style="padding: 24px; border-radius: 12px; width: 100%; max-width: 420px; gap: 16px; display: flex; flex-direction: column;">
-    <h2 style="margin: 0 0 10px 0; font-size: 22px; color: #333;">Add Schedule</h2>
-    
-    <div>
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Assign Staff <span style="color:red;">*</span></label>
-        <select name="user_id" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-          <option value="">-- Select Staff Member --</option>
-          <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user["user_id"]) . '">' . htmlspecialchars($user["full_name"]) . '</option>'; } ?>
-        </select>
-    </div>
-    
-    <div>
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Floor Level <span style="color:red;">*</span></label>
-        <select name="floor_level" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-          <option value="">-- Select Floor Level --</option>
-          <option value="1st">1st Floor</option>
-          <option value="2nd">2nd Floor</option>
-          <option value="3rd">3rd Floor</option>
-        </select>    
-    </div>
-
-    <div>
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Task Description <span style="color:red;">*</span></label>
-        <input type="text" list="commonTasks" name="task_description" placeholder="Select from list or type a custom task..." required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa;">
-        <datalist id="commonTasks">
-            <option value="Empty All Bins">
-            <option value="Perform Routine Maintenance">
-            <option value="Clean Kiosk Area">
-            <option value="Inspect Sensors">
-        </datalist>
-        <small style="color: #888; font-size: 12px; margin-top: 6px; display: block;">
-            <i class='bx bx-info-circle'></i> Double-click the input box to see common tasks.
-        </small>
-    </div>
-
-    <div>
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Schedule Date <span style="color:red;">*</span></label>
-        <input type="date" name="schedule_date" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-    </div>
-
-    <div class="modal-actions" style="display: flex; gap: 12px; margin-top: 10px;">
-      <button type="submit" class="btn-primary" style="flex: 1; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Save Schedule</button>
-      <button type="button" class="cancel-btn" id="closeScheduleModalBtn" style="flex: 1; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; background: #f1f1f1; color: #333; border: none; cursor: pointer;">Cancel</button>
-    </div>
-  </form>
-</div>
-
-<div id="taskModal" class="custom-modal">
-  <form id="addTasksForm" method="post" action="/controllers/Actions/add_tasks.php" class="modal-form">
-    <h2>Add Task</h2>
-    <select name="user_id" required>
-      <option value="">-- Select Staff Member --</option>
-      <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user['user_id']) . '">' . htmlspecialchars($user['full_name']) . '</option>'; } ?>
-    </select>
-    
-    <div style="display:flex; gap:12px;">
-      <select id="machine_id" name="machine_id" required style="flex:1;">
-          <option value="">-- Select Machine --</option>
-          <?php foreach($machines as $machine): ?>
-              <option value="<?= htmlspecialchars($machine['machine_id']) ?>"><?= htmlspecialchars($machine['machine_name']) ?></option>
-          <?php endforeach; ?>
-      </select>
-
-      <select id="bin_id" name="bin_id" required style="flex:1;">
-          <option value="">-- Select Bin --</option>
-          </select>
-    </div>
-    
-    <textarea id="task_description" name="task_description" rows="3" placeholder="Task Description" required></textarea>
-    <select id="status" name="status" required>
-      <option value="">-- Select Status --</option>
-      <option value="Pending">Pending</option>
-      <option value="In Progress">In Progress</option>
-      <option value="Done">Done</option>
-    </select>
-    <input type="datetime-local" id="created_at" name="created_at" required>
-    <div class="modal-actions">
-      <button type="submit" class="empty-btn" style="justify-content:center;">Save Task</button>
-      <button type="button" class="cancel-btn" id="closeTaskModalBtn">Cancel</button>
-    </div>
-  </form>
-</div>
+<?php include __DIR__ . '/../components/add_schedule_modal.php'; ?>
+<?php include __DIR__ . '/../components/add_task_modal.php'; ?>
 
 <?php ob_start(); ?>
 
@@ -398,45 +317,9 @@ function switchTab(evt, tabId) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  const scheduleModal = document.getElementById('scheduleModal');
-  const taskModal = document.getElementById('taskModal');
-  
-  // Elements for Dynamic Dropdown
-  const machineSelect = document.getElementById('machine_id');
-  const binSelect = document.getElementById('bin_id');
-  const allBins = <?= json_encode($bins) ?>;
-
-  document.getElementById('openScheduleModalBtn').onclick = () => scheduleModal.style.display = 'flex';
-  document.getElementById('closeScheduleModalBtn').onclick = () => { scheduleModal.style.display = 'none'; document.getElementById('addScheduleForm').reset(); };
-  
-  document.getElementById('openTaskModalBtn').onclick = () => taskModal.style.display = 'flex';
-  document.getElementById('closeTaskModalBtn').onclick = () => { 
-      taskModal.style.display = 'none'; 
-      document.getElementById('addTasksForm').reset(); 
-      binSelect.innerHTML = '<option value="">-- Select Bin --</option>'; // Reset dropdown on close
-  };
-
-  // Handle Cascading Dropdown functionality for Tasks
-  machineSelect.addEventListener('change', function() {
-      const selectedMachineId = this.value;
-      binSelect.innerHTML = '<option value="">-- Select Bin --</option>';
-      
-      if (selectedMachineId) {
-          const filteredBins = allBins.filter(bin => bin.machine_id == selectedMachineId);
-          if(filteredBins.length === 0) {
-              binSelect.innerHTML = '<option value="">No Bins Available</option>';
-          } else {
-              filteredBins.forEach(bin => {
-                  const option = document.createElement('option');
-                  option.value = bin.bin_id;
-                  option.textContent = bin.bin_type; 
-                  binSelect.appendChild(option);
-              });
-          }
-      }
-  });
-
-  // Live Bin Data
+  // -----------------------------------------------------------------
+  // LIVE BIN DATA (Dashboard Cards)
+  // -----------------------------------------------------------------
   async function fetchLiveBinData() {
     try {
       const response = await fetch("/controllers/Api/fetch_bin_status.php");
@@ -467,7 +350,9 @@ document.addEventListener('DOMContentLoaded', function() {
   setInterval(fetchLiveBinData, 5000);
   fetchLiveBinData();
 });
+
 </script>
+<?php include __DIR__ . '/../components/modal_scripts.php'; ?>
 <?php 
 $extra_js = ob_get_clean();
 require_once __DIR__ . '/../layouts/footer.php'; 

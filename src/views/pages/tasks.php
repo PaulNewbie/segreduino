@@ -196,41 +196,7 @@ require_once __DIR__ . '/../layouts/header.php';
   </div>
 </main> 
 
-<div id="taskModal" class="custom-modal">
-  <form id="addTasksForm" method="post" action="/controllers/Actions/add_tasks.php" class="modal-form">
-    <h2>Add Task</h2>
-    <select name="user_id" required>
-      <option value="">-- Select Staff Member --</option>
-      <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user['user_id']) . '">' . htmlspecialchars($user['full_name']) . '</option>'; } ?>
-    </select>
-    
-    <div style="display:flex; gap:12px;">
-        <select id="machine_id" name="machine_id" required style="flex:1;">
-            <option value="">-- Select Machine --</option>
-            <?php foreach($machines as $machine): ?>
-                <option value="<?= htmlspecialchars($machine['machine_id']) ?>"><?= htmlspecialchars($machine['machine_name']) ?></option>
-            <?php endforeach; ?>
-        </select>
-
-        <select id="bin_id" name="bin_id" required style="flex:1;">
-            <option value="">-- Select Bin --</option>
-            </select>
-    </div>
-    
-    <textarea id="task_description" name="task_description" rows="3" placeholder="Task Description" required></textarea>
-    <select id="status" name="status" required>
-        <option value="">-- Select Status --</option>
-        <option value="pending">Pending</option>
-        <option value="in_progress">In Progress</option>
-        <option value="completed">Done</option>
-    </select>
-    <input type="datetime-local" id="created_at" name="created_at" required>
-    <div class="modal-actions">
-      <button type="submit" class="btn-primary" style="justify-content:center;">Save Task</button>
-      <button type="button" class="cancel-btn" id="closeTaskModalBtn">Cancel</button>
-    </div>
-  </form>
-</div>
+<?php include __DIR__ . '/../components/add_task_modal.php'; ?>
 
 <?php ob_start(); ?>
 
@@ -258,29 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const allBins = <?= json_encode($bins) ?>;
 
   // Handle Cascading Dropdown functionality
-  machineSelect.addEventListener('change', function() {
-      const selectedMachineId = this.value;
-      
-      // Reset Bin dropdown
-      binSelect.innerHTML = '<option value="">-- Select Bin --</option>';
-      
-      if (selectedMachineId) {
-          // Filter bins matching the selected machine
-          const filteredBins = allBins.filter(bin => bin.machine_id == selectedMachineId);
-          
-          if(filteredBins.length === 0) {
-              binSelect.innerHTML = '<option value="">No Bins Available</option>';
-          } else {
-              // Add matched bins to the dropdown
-              filteredBins.forEach(bin => {
-                  const option = document.createElement('option');
-                  option.value = bin.bin_id;
-                  option.textContent = bin.bin_type; 
-                  binSelect.appendChild(option);
-              });
-          }
-      }
-  });
+  ?php include __DIR__ . '/../components/modal_scripts.php'; ?>
 
   document.getElementById('openTaskModalBtn').onclick = () => taskModal.style.display = 'flex';
   
