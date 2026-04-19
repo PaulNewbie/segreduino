@@ -1,90 +1,65 @@
-<div id="scheduleModal" class="custom-modal">
-  <form id="addScheduleForm" method="post" action="/controllers/Actions/add_schedule.php" class="modal-form" style="padding: 24px; border-radius: 12px; width: 100%; max-width: 420px; gap: 16px; display: flex; flex-direction: column;">
-    <h2 style="margin: 0 0 10px 0; font-size: 22px; color: #333;">Add Routine Schedule</h2>
+<?php
+// src/controllers/Actions/add_schedule.php
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    require_once __DIR__ . '/../../config/config.php';
     
-    <div>
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Assign Staff <span style="color:red;">*</span></label>
-        <select name="user_id" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-          <option value="">-- Select Staff Member --</option>
-          <?php foreach($users as $user) { echo '<option value="' . htmlspecialchars($user["user_id"]) . '">' . htmlspecialchars($user["full_name"]) . '</option>'; } ?>
-        </select>
-    </div>
+    $referer = $_SERVER['HTTP_REFERER'] ?? '/dashboard.php';
+    $redirect_url = strtok($referer, '?'); 
+
+    if ($conn->connect_error) {
+        header("Location: $redirect_url?error=" . urlencode("Database connection failed."));
+        exit;
+    }
+
+    // Safely grab the data from the form
+    $user_id = isset($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
+    $machine_id = isset($_POST['machine_id']) ? (int)$_POST['machine_id'] : 0;
+    $bin_id = isset($_POST['bin_id']) ? (int)$_POST['bin_id'] : 0;
+    $floor_level = trim($_POST['floor_level'] ?? '');
+    $task_description = trim($_POST['task_description'] ?? '');
     
-    <div style="display:flex; gap:12px;">
-      <div style="flex:1;">
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Machine / Kiosk <span style="color:red;">*</span></label>
-        <select id="schedule_machine_id" name="machine_id" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-            <option value="">-- Select Machine --</option>
-            <?php foreach($machines as $machine): ?>
-                <option value="<?= htmlspecialchars($machine['machine_id']) ?>"><?= htmlspecialchars($machine['machine_name']) ?></option>
-            <?php endforeach; ?>
-        </select>
-      </div>
-
-      <div style="flex:1;">
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Trash Bin <span style="color:red;">*</span></label>
-        <select id="schedule_bin_id" name="bin_id" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-            <option value="">-- Select Bin --</option>
-        </select>
-      </div>
-    </div>
-
-    <div>
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Floor Level <span style="color:red;">*</span></label>
-        <select name="floor_level" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-          <option value="">-- Select Floor Level --</option>
-          <option value="1st">1st Floor</option>
-          <option value="2nd">2nd Floor</option>
-          <option value="3rd">3rd Floor</option>
-        </select>    
-    </div>
-
-    <div>
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Task Description <span style="color:red;">*</span></label>
-        <input type="text" list="commonTasks" name="task_description" placeholder="Select from list or type a custom task..." required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa;">
-        <datalist id="commonTasks">
-            <option value="Empty All Bins">
-            <option value="Perform Routine Maintenance">
-            <option value="Clean Kiosk Area">
-            <option value="Inspect Sensors">
-        </datalist>
-        <small style="color: #888; font-size: 12px; margin-top: 6px; display: block;">
-            <i class='bx bx-info-circle'></i> Double-click to see common tasks.
-        </small>
-    </div>
-
-    <div style="display:flex; gap:12px;">
-      <div style="flex:1;">
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Routine Pattern <span style="color:red;">*</span></label>
-        <select name="recurrence_pattern" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-            <option value="weekly">Weekly</option>
-            <option value="daily">Daily</option>
-        </select>
-      </div>
-
-      <div style="flex:1;">
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Day of Week</label>
-        <select name="day_of_week" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-            <option value="Monday">Monday</option>
-            <option value="Tuesday">Tuesday</option>
-            <option value="Wednesday">Wednesday</option>
-            <option value="Thursday">Thursday</option>
-            <option value="Friday">Friday</option>
-            <option value="Saturday">Saturday</option>
-            <option value="Sunday">Sunday</option>
-        </select>
-      </div>
-    </div>
+    // Routine Variables
+    $recurrence_pattern = trim($_POST['recurrence_pattern'] ?? 'weekly');
+    $day_of_week = trim($_POST['day_of_week'] ?? '');
+    $schedule_time = trim($_POST['schedule_time'] ?? '08:00:00');
     
-    <div>
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Generation Time <span style="color:red;">*</span></label>
-        <input type="time" name="schedule_time" value="08:00" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa;">
-        <small style="color: #888; font-size: 12px; margin-top: 6px; display: block;">When should this task appear on the staff's app?</small>
-    </div>
+    // --- THE FIX ---
+    // Give the database a placeholder date so it doesn't crash!
+    $schedule_date = date('Y-m-d'); 
+    
+    $created_at = date('Y-m-d H:i:s'); 
 
-    <div class="modal-actions" style="display: flex; gap: 12px; margin-top: 10px;">
-      <button type="submit" class="btn-primary" style="flex: 1; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Save Routine</button>
-      <button type="button" class="cancel-btn" id="closeScheduleModalBtn" style="flex: 1; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; background: #f1f1f1; color: #333; border: none; cursor: pointer;">Cancel</button>
-    </div>
-  </form>
-</div>
+    // Detailed Validation: Find exactly what is missing
+    $missing_fields = [];
+    if ($user_id === 0) $missing_fields[] = "Assign Staff";
+    if ($machine_id === 0) $missing_fields[] = "Machine/Kiosk";
+    if ($bin_id === 0) $missing_fields[] = "Trash Bin";
+    if (empty($task_description)) $missing_fields[] = "Task Description";
+
+    if (!empty($missing_fields)) {
+        $error_msg = "Please fill in: " . implode(", ", $missing_fields);
+        header("Location: $redirect_url?error=" . urlencode($error_msg));
+        exit;
+    }
+
+    // Insert the Schedule template (Now including schedule_date placeholder)
+    $stmt = $conn->prepare("INSERT INTO schedules (user_id, machine_id, bin_id, floor_level, task_description, recurrence_pattern, day_of_week, schedule_time, schedule_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    
+    // Notice we now bind 10 parameters (added $schedule_date)
+    $stmt->bind_param("iiisssssss", $user_id, $machine_id, $bin_id, $floor_level, $task_description, $recurrence_pattern, $day_of_week, $schedule_time, $schedule_date, $created_at);
+    
+    if ($stmt->execute()) {
+        header("Location: $redirect_url?success=" . urlencode("Routine schedule successfully created."));
+    } else {
+        error_log("Schedule Insert Error: " . $stmt->error);
+        header("Location: $redirect_url?error=" . urlencode("Database error: Could not save schedule."));
+    }
+    
+    $stmt->close();
+    exit;
+} else {
+    header("Location: /dashboard.php");
+    exit;
+}
+?>

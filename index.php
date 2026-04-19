@@ -31,6 +31,17 @@ if (strpos($request, '/controllers/') === 0) {
     }
 }
 
+// =========================================================
+// Allow direct access to the Cron Engine scripts folder
+// =========================================================
+if (strpos($request, '/scripts/') === 0) {
+    $file_path = __DIR__ . $request;
+    if (file_exists($file_path)) {
+        require $file_path;
+        exit; 
+    }
+}
+
 switch ($request) {
     // MAIN PAGES
     case '/dashboard.php':
@@ -91,6 +102,10 @@ switch ($request) {
         require __DIR__ . '/test_view.php';
         break;
 
+    case '/generate_routine_tasks.php':
+        require __DIR__ . '/generate_routine_tasks.php';
+        break;
+    
     default:
         http_response_code(404);
         echo "<h1 style='text-align:center; margin-top:50px; font-family:sans-serif;'>404 - Page Not Found</h1>";
