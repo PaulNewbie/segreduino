@@ -215,26 +215,10 @@ function runTaskFilter() {
         timeCol: 4
     });
 }
-document.addEventListener('DOMContentLoaded', function() {
-  const taskModal = document.getElementById('taskModal');
-  const machineSelect = document.getElementById('machine_id');
-  const binSelect = document.getElementById('bin_id');
-  
-  // Pass PHP bins array to JS
-  const allBins = <?= json_encode($bins) ?>;
-
-  // Handle Cascading Dropdown functionality
-  ?php include __DIR__ . '/../components/modal_scripts.php'; ?>
-
-  document.getElementById('openTaskModalBtn').onclick = () => taskModal.style.display = 'flex';
-  
-  document.getElementById('closeTaskModalBtn').onclick = () => { 
-      taskModal.style.display = 'none'; 
-      document.getElementById('addTasksForm').reset();
-      binSelect.innerHTML = '<option value="">-- Select Bin --</option>'; // Reset dropdown on close
-  };
-});
 </script>
+
+<?php include __DIR__ . '/../components/modal_scripts.php'; ?>
+
 <?php 
 $extra_js = ob_get_clean();
 require_once __DIR__ . '/../layouts/footer.php'; 

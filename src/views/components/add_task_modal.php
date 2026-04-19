@@ -44,6 +44,22 @@
         </small>
     </div>
 
+    <div style="display:flex; gap:12px;">
+      <div style="flex:1;">
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Status <span style="color:red;">*</span></label>
+        <select name="status" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Done">Done</option>
+        </select>
+      </div>
+
+      <div style="flex:1;">
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Date Created <span style="color:red;">*</span></label>
+        <input type="datetime-local" name="created_at" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
+      </div>
+    </div>
+
     <div class="modal-actions" style="display: flex; gap: 12px; margin-top: 10px;">
       <button type="submit" class="btn-primary" style="flex: 1; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Save Task</button>
       <button type="button" class="cancel-btn" id="closeTaskModalBtn" style="flex: 1; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; background: #f1f1f1; color: #333; border: none; cursor: pointer;">Cancel</button>

@@ -7,41 +7,50 @@ header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Accept");
 header("Content-Type: application/json; charset=UTF-8");
 
-// --- Handle OPTIONS request ---
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-// --- Allow only GET method ---
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    http_response_code(405); // Method Not Allowed
-    echo json_encode([
-        'success' => false,
-        'message' => 'Only GET method is allowed'
-    ]);
+    http_response_code(405); 
+    echo json_encode(['success' => false, 'message' => 'Only GET method is allowed']);
     exit;
 }
 
 try {
-    // Connect DB
     require_once __DIR__ . '/../../config/config.php';
     if ($conn->connect_error) {
         throw new Exception("Connection failed: " . $conn->connect_error);
     }
     $conn->set_charset("utf8mb4");
 
-    // Get user_id from query param
     $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
 
-    // Assuming your table is named 'schedules'. Change if it's different in your DB.
     if ($user_id > 0) {
-        // Staff → only their schedules
-        $stmt = $conn->prepare("SELECT * FROM schedules WHERE user_id = ? ORDER BY created_at DESC");
+        // Staff → join with tasks to read the 'task_status'
+        $stmt = $conn->prepare("
+            SELECT schedules.*, users.full_name, tasks.task_status 
+            FROM schedules 
+            JOIN users ON schedules.user_id = users.user_id
+            LEFT JOIN tasks ON schedules.user_id = tasks.user_id 
+                AND schedules.task_description = tasks.task_description 
+                AND schedules.created_at = tasks.created_at
+            WHERE schedules.user_id = ? 
+            ORDER BY schedules.created_at DESC
+        ");
         $stmt->bind_param("i", $user_id);
     } else {
         // Admin → all schedules
-        $stmt = $conn->prepare("SELECT * FROM schedules ORDER BY created_at DESC");
+        $stmt = $conn->prepare("
+            SELECT schedules.*, users.full_name, tasks.task_status 
+            FROM schedules 
+            JOIN users ON schedules.user_id = users.user_id
+            LEFT JOIN tasks ON schedules.user_id = tasks.user_id 
+                AND schedules.task_description = tasks.task_description 
+                AND schedules.created_at = tasks.created_at
+            ORDER BY schedules.created_at DESC
+        ");
     }
 
     $stmt->execute();
@@ -52,20 +61,15 @@ try {
         $schedules[] = $row;
     }
 
-    // Note: returning as 'tasks' key because your Flutter app's fetchSchedules 
-    // method is currently expecting data['tasks']
     echo json_encode([
         'success' => true,
         'tasks' => $schedules 
     ]);
 
     $stmt->close();
-    
 
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Server Error: ' . $e->getMessage()
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Server Error: ' . $e->getMessage()]);
 }
+?>

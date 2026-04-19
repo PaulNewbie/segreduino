@@ -199,24 +199,10 @@ function runSchedFilter() {
         timeCol: 3 
     });
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-  const scheduleModal = document.getElementById('scheduleModal');
-  const scheduleMachineSelect = document.getElementById('schedule_machine_id');
-  const scheduleBinSelect = document.getElementById('schedule_bin_id');
-  const allBins = <?= json_encode($bins) ?>;
-
-  document.getElementById('openScheduleModalBtn').onclick = () => scheduleModal.style.display = 'flex';
-  document.getElementById('closeScheduleModalBtn').onclick = () => { 
-      scheduleModal.style.display = 'none'; 
-      document.getElementById('addScheduleForm').reset(); 
-      scheduleBinSelect.innerHTML = '<option value="">-- Select Bin --</option>';
-  };
-
-  // Cascading dropdown logic
-  <?php include __DIR__ . '/../components/modal_scripts.php'; ?>
-});
 </script>
+
+<?php include __DIR__ . '/../components/modal_scripts.php'; ?>
+
 <?php 
 $extra_js = ob_get_clean();
 require_once __DIR__ . '/../layouts/footer.php'; 

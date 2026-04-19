@@ -12,21 +12,31 @@
     
     <div style="display:flex; gap:12px;">
       <div style="flex:1;">
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Machine / Kiosk <span style="color:red;">*</span></label>
-        <select id="schedule_machine_id" name="machine_id" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-            <option value="">-- Select Machine --</option>
-            <?php foreach($machines as $machine): ?>
-                <option value="<?= htmlspecialchars($machine['machine_id']) ?>"><?= htmlspecialchars($machine['machine_name']) ?></option>
-            <?php endforeach; ?>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Routine Pattern <span style="color:red;">*</span></label>
+        <select name="recurrence_pattern" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
+            <option value="weekly">Weekly</option>
+            <option value="daily">Daily</option>
         </select>
       </div>
 
       <div style="flex:1;">
-        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Trash Bin <span style="color:red;">*</span></label>
-        <select id="schedule_bin_id" name="bin_id" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
-            <option value="">-- Select Bin --</option>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Day of Week</label>
+        <select name="day_of_week" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa; cursor: pointer;">
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option>
         </select>
       </div>
+    </div>
+    
+    <div>
+        <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">Generation Time <span style="color:red;">*</span></label>
+        <input type="time" name="schedule_time" value="08:00" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; background: #fafafa;">
+        <small style="color: #888; font-size: 12px; margin-top: 6px; display: block;">When should this task appear on the staff's app?</small>
     </div>
 
     <div>
