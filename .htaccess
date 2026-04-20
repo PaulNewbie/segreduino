@@ -1,8 +1,11 @@
 RewriteEngine On
 
-# Don’t rewrite real files or folders (css, js, images, etc.)
+# Never rewrite actual files (css, js, images, fonts)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Send everything else to index.php
+# Skip rewriting for the assets directory entirely
+RewriteRule ^(assets|db_backup|src/vendor)/ - [L,NC]
+
+# Route everything else through index.php
 RewriteRule ^ index.php [QSA,L]
