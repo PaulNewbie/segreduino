@@ -169,13 +169,22 @@ require_once __DIR__ . '/../layouts/header.php';
                 </thead>
                 <tbody>
                     <?php
-                    // Fetch logs and join with both admin_users and users tables to get the name/username
+                    // Fix the ID overlap by joining based on the Platform
                     $log_sql = "SELECT a.*, 
-                                COALESCE(u.username, au.username) as display_name 
-                                FROM activity_logs a 
-                                LEFT JOIN users u ON a.user_id = u.user_id 
-                                LEFT JOIN admin_users au ON a.user_id = au.id 
-                                ORDER BY a.created_at DESC";
+                        CASE 
+                            WHEN a.platform = 'Web' THEN CONCAT(au.first_name, ' ', au.last_name)
+                            WHEN a.platform = 'Mobile' THEN u.full_name
+                            ELSE 'Unknown User'
+                        END as display_name,
+                        CASE 
+                            WHEN a.platform = 'Web' THEN 'Admin'
+                            WHEN a.platform = 'Mobile' THEN 'Staff'
+                            ELSE 'Unknown'
+                        END as role
+                        FROM activity_logs a 
+                        LEFT JOIN users u ON a.user_id = u.user_id AND a.platform = 'Mobile'
+                        LEFT JOIN admin_users au ON a.user_id = au.id AND a.platform = 'Web'
+                        ORDER BY a.created_at DESC";
                                 
                     $log_result = $conn->query($log_sql);
                     
@@ -186,7 +195,12 @@ require_once __DIR__ . '/../layouts/header.php';
                             
                             echo "<tr>";
                             echo "<td>" . date('M d, Y h:i A', strtotime($log['created_at'])) . "</td>";
-                            echo "<td>" . htmlspecialchars($displayName) . "</td>";
+                            
+                            // Display the name WITH a tiny badge indicating if they are Admin or Staff
+                            $roleBadge = ($log['role'] === 'Admin') ? '<span class="badge role-admin" style="font-size:10px; padding:2px 4px; margin-left:5px;">Admin</span>' : '<span class="badge role-staff" style="font-size:10px; padding:2px 4px; margin-left:5px;">Staff</span>';
+                            
+                            echo "<td><strong>" . htmlspecialchars($displayName) . "</strong>" . $roleBadge . "</td>";
+                            
                             echo "<td>" . htmlspecialchars($log['action']) . "</td>";
                             echo "<td><span style='padding:4px 8px; border-radius:4px; font-size:12px; background: " . ($log['platform'] == 'Web' ? '#e0f2fe; color: #0284c7;' : '#dcfce7; color: #166534;') . "'>" . htmlspecialchars($log['platform']) . "</span></td>";
                             echo "</tr>";
