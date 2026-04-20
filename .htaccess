@@ -1,11 +1,11 @@
 RewriteEngine On
 
-# Never rewrite actual files (css, js, images, fonts)
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-
-# Skip rewriting for the assets directory entirely
+# 1. Skip rewriting for these directories entirely (serve them directly)
 RewriteRule ^(assets|db_backup|src/vendor)/ - [L,NC]
 
-# Route everything else through index.php
+# 2. For everything else, if it is NOT a real file...
+RewriteCond %{REQUEST_FILENAME} !-f
+# ...and NOT a real directory...
+RewriteCond %{REQUEST_FILENAME} !-d
+# 3. THEN route it through index.php
 RewriteRule ^ index.php [QSA,L]

@@ -24,10 +24,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $day_of_week = trim($_POST['day_of_week'] ?? '');
     $schedule_time = trim($_POST['schedule_time'] ?? '08:00:00');
     
-    // --- THE FIX ---
     // Give the database a placeholder date so it doesn't crash!
     $schedule_date = date('Y-m-d'); 
-    
     $created_at = date('Y-m-d H:i:s'); 
 
     // Detailed Validation: Find exactly what is missing
@@ -43,14 +41,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    // Insert the Schedule template (Now including schedule_date placeholder)
+    // 1. Insert the Schedule template
     $stmt = $conn->prepare("INSERT INTO schedules (user_id, machine_id, bin_id, floor_level, task_description, recurrence_pattern, day_of_week, schedule_time, schedule_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
-    // Notice we now bind 10 parameters (added $schedule_date)
     $stmt->bind_param("iiisssssss", $user_id, $machine_id, $bin_id, $floor_level, $task_description, $recurrence_pattern, $day_of_week, $schedule_time, $schedule_date, $created_at);
     
     if ($stmt->execute()) {
-        header("Location: $redirect_url?success=" . urlencode("Routine schedule successfully created."));
+        
+        // --- NEW CODE: AUTOMATICALLY CREATE A TASK ---
+        $task_status = 'pending'; // Default status for new tasks
+        
+        $task_stmt = $conn->prepare("INSERT INTO tasks (user_id, bin_id, machine_id, task_description, task_status, created_at) VALUES (?, ?, ?, ?, ?, ?)");
+        $task_stmt->bind_param("iiisss", $user_id, $bin_id, $machine_id, $task_description, $task_status, $created_at);
+        
+        // Execute the task insertion, but we don't necessarily need to block the schedule success if it fails, 
+        // though typically you'd log it if it failed.
+        if (!$task_stmt->execute()) {
+             error_log("Auto-Task Insert Error: " . $task_stmt->error);
+        }
+        $task_stmt->close();
+        // ---------------------------------------------
+
+        header("Location: $redirect_url?success=" . urlencode("Routine schedule created and added to Tasks."));
     } else {
         error_log("Schedule Insert Error: " . $stmt->error);
         header("Location: $redirect_url?error=" . urlencode("Database error: Could not save schedule."));
