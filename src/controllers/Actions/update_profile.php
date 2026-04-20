@@ -61,7 +61,10 @@ if ($isWeb) {
     if ($stmt->execute()) {
         // Update the session email so the UI doesn't break if they use email to log in
         $_SESSION['email'] = $email; 
-        
+
+        $admin_id = $_SESSION['user_id'] ?? 0;
+        $conn->query("INSERT INTO activity_logs (user_id, action, platform) VALUES ($admin_id, 'Updated Web Admin profile settings', 'Web')");
+
         $_SESSION['success_msg'] = "Personal information updated successfully.";
         header("Location: /profile.php");
         exit;

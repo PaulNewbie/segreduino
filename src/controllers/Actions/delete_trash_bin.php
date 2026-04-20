@@ -15,6 +15,10 @@ if (!$id) {
 $stmt = $conn->prepare("DELETE FROM trash_bins WHERE bin_id=?");
 $stmt->bind_param("i", $id);
 if ($stmt->execute()) {
+  if (session_status() === PHP_SESSION_NONE) session_start();
+  $admin_id = $_SESSION['user_id'] ?? 0;
+  $conn->query("INSERT INTO activity_logs (user_id, action, platform) VALUES ($admin_id, 'Deleted trash bin ID: $id', 'Web')");
+
   echo json_encode(["success" => true, "message" => "Bin deleted successfully"]);
 } else {
   echo json_encode(["success" => false, "message" => "Delete failed"]);

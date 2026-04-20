@@ -52,6 +52,10 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("isssss", $machine_id, $floor_level, $hallway_side, $bin_type, $bin_status, $last_updated);
 
 if ($stmt->execute()) {
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    $admin_id = $_SESSION['user_id'] ?? 0;
+    $conn->query("INSERT INTO activity_logs (user_id, action, platform) VALUES ($admin_id, 'Added a new trash bin: $bin_type', 'Web')");
+
     echo json_encode(["success" => true, "message" => "Bin successfully added"]);
 } else {
     echo json_encode(["success" => false, "message" => "Insert failed: " . $stmt->error]);

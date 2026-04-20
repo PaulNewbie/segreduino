@@ -62,6 +62,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $task_stmt->close();
         // ---------------------------------------------
 
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $admin_id = $_SESSION['user_id'] ?? 0;
+        $clean_desc = $conn->real_escape_string($task_description);
+        $conn->query("INSERT INTO activity_logs (user_id, action, platform) VALUES ($admin_id, 'Created a new maintenance schedule: $clean_desc', 'Web')");
+
         header("Location: $redirect_url?success=" . urlencode("Routine schedule created and added to Tasks."));
     } else {
         error_log("Schedule Insert Error: " . $stmt->error);

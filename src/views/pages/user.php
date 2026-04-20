@@ -157,44 +157,48 @@ require_once __DIR__ . '/../layouts/header.php';
     </div>
 
     <div class="tab-content" id="activity-logs-tab">
-        <div class="table-controls">
-            <input type="text" id="searchAct" class="filter-input search-bar" placeholder="Search action or user..." onkeyup="filterActivity()">
-            <div class="filter-group">
-                <label style="font-size:14px; color:#555;">Date:</label>
-                <input type="date" id="dateStartAct" class="filter-input" onchange="filterActivity()">
-                <span style="color:#888;">to</span>
-                <input type="date" id="dateEndAct" class="filter-input" onchange="filterActivity()">
-            </div>
-        </div>
-
         <div class="table-scroll-wrapper">
-            <table class="activity-table" id="actTable">
-            <thead>
-                <tr>
-                <th class="sortable" onclick="sortTable('actTable', 0, true)">Date/Time <i class='bx bx-sort sort-icon'></i></th>
-                <th class="sortable" onclick="sortTable('actTable', 1)">User <i class='bx bx-sort sort-icon'></i></th>
-                <th class="sortable" onclick="sortTable('actTable', 2)">Action <i class='bx bx-sort sort-icon'></i></th>
-                <th class="sortable" onclick="sortTable('actTable', 3)">Details <i class='bx bx-sort sort-icon'></i></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                <td data-time="1747821600">May 21, 2025 - 10:00 AM</td>
-                <td><strong>Maria Santos</strong></td><td>Emptied Bin</td><td>Biodegradable Bin (ID: 1)</td>
-                </tr>
-                <tr>
-                <td data-time="1747819800">May 21, 2025 - 09:30 AM</td>
-                <td><strong>Juan Dela Cruz</strong></td><td>Emptied Bin</td><td>Non-Biodegradable Bin (ID: 2)</td>
-                </tr>
-                <tr>
-                <td data-time="1747759500">May 20, 2025 - 04:45 PM</td>
-                <td><strong>Jose Ramos</strong></td><td>Updated Profile</td><td>Changed email address</td>
-                </tr>
-            </tbody>
+            <table class="log-table" id="activityTable">
+                <thead>
+                    <tr>
+                        <th>Date/Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Platform</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch logs and join with both admin_users and users tables to get the name/username
+                    $log_sql = "SELECT a.*, 
+                                COALESCE(u.username, au.username) as display_name 
+                                FROM activity_logs a 
+                                LEFT JOIN users u ON a.user_id = u.user_id 
+                                LEFT JOIN admin_users au ON a.user_id = au.id 
+                                ORDER BY a.created_at DESC";
+                                
+                    $log_result = $conn->query($log_sql);
+                    
+                    if ($log_result && $log_result->num_rows > 0) {
+                        while ($log = $log_result->fetch_assoc()) {
+                            $platformClass = ($log['platform'] === 'Web') ? 'badge-web' : 'badge-mobile';
+                            $displayName = $log['display_name'] ? $log['display_name'] : 'User #' . $log['user_id'];
+                            
+                            echo "<tr>";
+                            echo "<td>" . date('M d, Y h:i A', strtotime($log['created_at'])) . "</td>";
+                            echo "<td>" . htmlspecialchars($displayName) . "</td>";
+                            echo "<td>" . htmlspecialchars($log['action']) . "</td>";
+                            echo "<td><span style='padding:4px 8px; border-radius:4px; font-size:12px; background: " . ($log['platform'] == 'Web' ? '#e0f2fe; color: #0284c7;' : '#dcfce7; color: #166534;') . "'>" . htmlspecialchars($log['platform']) . "</span></td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='4' style='text-align:center;'>No activity logs found.</td></tr>";
+                    }
+                    ?>
+                </tbody>
             </table>
         </div>
     </div>
-
   </div>
 </main>
 
