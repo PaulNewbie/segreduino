@@ -193,6 +193,7 @@ require_once __DIR__ . '/../layouts/header.php';
                             $platformClass = ($log['platform'] === 'Web') ? 'badge-web' : 'badge-mobile';
                             $displayName = $log['display_name'] ? $log['display_name'] : 'User #' . $log['user_id'];
                             
+                            
                             echo "<tr>";
                             echo "<td>" . date('M d, Y h:i A', strtotime($log['created_at'])) . "</td>";
                             

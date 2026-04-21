@@ -261,7 +261,6 @@ require_once __DIR__ . '/../layouts/header.php';
               <!-- Created -->
               <td data-time="<?= $timestamp ?>">
                 <div class="date-main"><?= htmlspecialchars(date('M d, Y', $timestamp)) ?></div>
-                <div class="date-rel"><?= $relDate ?></div>
               </td>
             </tr>
             <?php endwhile; ?>

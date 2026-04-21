@@ -28,14 +28,21 @@ try {
     $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
 
     if ($user_id > 0) {
-        // Staff → join with tasks to read the 'task_status'
+        // Staff → join with tasks, machines, and trash_bins
         $stmt = $conn->prepare("
-            SELECT schedules.*, users.full_name, tasks.task_status 
+            SELECT 
+                schedules.*, 
+                users.full_name, 
+                tasks.task_status,
+                machines.machine_name,
+                trash_bins.bin_type
             FROM schedules 
             JOIN users ON schedules.user_id = users.user_id
             LEFT JOIN tasks ON schedules.user_id = tasks.user_id 
                 AND schedules.task_description = tasks.task_description 
                 AND schedules.created_at = tasks.created_at
+            LEFT JOIN machines ON tasks.machine_id = machines.machine_id
+            LEFT JOIN trash_bins ON tasks.bin_id = trash_bins.bin_id
             WHERE schedules.user_id = ? 
             ORDER BY schedules.created_at DESC
         ");
@@ -43,12 +50,19 @@ try {
     } else {
         // Admin → all schedules
         $stmt = $conn->prepare("
-            SELECT schedules.*, users.full_name, tasks.task_status 
+            SELECT 
+                schedules.*, 
+                users.full_name, 
+                tasks.task_status,
+                machines.machine_name,
+                trash_bins.bin_type
             FROM schedules 
             JOIN users ON schedules.user_id = users.user_id
             LEFT JOIN tasks ON schedules.user_id = tasks.user_id 
                 AND schedules.task_description = tasks.task_description 
                 AND schedules.created_at = tasks.created_at
+            LEFT JOIN machines ON tasks.machine_id = machines.machine_id
+            LEFT JOIN trash_bins ON tasks.bin_id = trash_bins.bin_id
             ORDER BY schedules.created_at DESC
         ");
     }

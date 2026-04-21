@@ -119,7 +119,7 @@ require_once __DIR__ . '/../layouts/header.php';
 <main id="main-content">
   <div class="head-title">
     <div class="left">
-      <h1>Routine Manager</h1>
+      <h1>Schedule Manager</h1>
       <ul class="breadcrumb">
         <li><a href="/dashboard.php" style="color: #888; text-decoration: none; pointer-events: auto;">Dashboard</a></li>
         <li><i class="bx bx-chevron-right"></i></li>
