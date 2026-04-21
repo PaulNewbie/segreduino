@@ -12,7 +12,7 @@ if ($conn->connect_error) {
 }
 
 // ---------------------------------------------------------
-// PAGINATION & FILTER LOGIC (kept intact)
+// PAGINATION & FILTER LOGIC
 // ---------------------------------------------------------
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -25,11 +25,11 @@ $whereClause = "";
 $cleanFilter = strtolower(trim($filter));
 
 if ($cleanFilter === 'pending') {
-    $whereClause = "WHERE LOWER(tasks.task_status) LIKE '%pending%'";
+    $whereClause = "WHERE LOWER(task_status) LIKE '%pending%'";
 } elseif ($cleanFilter === 'in progress' || $cleanFilter === 'in_progress') {
-    $whereClause = "WHERE LOWER(tasks.task_status) LIKE '%progress%'";
+    $whereClause = "WHERE LOWER(task_status) LIKE '%progress%'";
 } elseif ($cleanFilter === 'done' || $cleanFilter === 'completed') {
-    $whereClause = "WHERE LOWER(tasks.task_status) LIKE '%done%' OR LOWER(tasks.task_status) LIKE '%complete%'";
+    $whereClause = "WHERE LOWER(task_status) LIKE '%done%' OR LOWER(task_status) LIKE '%complete%'";
 }
 
 // ---------------------------------------------------------
@@ -40,10 +40,15 @@ $countPending = 0;
 $countInProgress = 0;
 $countDone = 0;
 
-$cRes = $conn->query("SELECT task_status FROM tasks");
+// Combine actual tasks and schedules for accurate counting
+$cRes = $conn->query("
+    SELECT task_status FROM tasks 
+    UNION ALL 
+    SELECT 'scheduled' AS task_status FROM schedules
+");
 if ($cRes) {
     while ($cRow = $cRes->fetch_assoc()) {
-        $s = strtolower(trim($cRow['task_status']));
+        $s = strtolower(trim($cRow['task_status'] ?? ''));
         $countAll++;
         if (str_contains($s, 'pending'))                          $countPending++;
         elseif (str_contains($s, 'progress'))                     $countInProgress++;
@@ -57,20 +62,50 @@ $donePct       = $countAll > 0 ? round(($countDone       / $countAll) * 100) : 0
 // ---------------------------------------------------------
 // COUNT + FETCH for current filter/page
 // ---------------------------------------------------------
-$countSql = "SELECT COUNT(*) as total FROM tasks $whereClause";
+$countSql = "
+    SELECT COUNT(*) as total FROM (
+        SELECT task_status FROM tasks
+        UNION ALL
+        SELECT 'scheduled' AS task_status FROM schedules
+    ) AS combined_tables $whereClause
+";
 $countResult = $conn->query($countSql);
 $totalRows = $countResult->fetch_assoc()['total'] ?? 0;
 $totalPages = ceil($totalRows / $limit);
 
-$sql = "SELECT users.full_name, tasks.task_description, tasks.task_status, tasks.created_at,
-               machines.machine_name, trash_bins.bin_type
+// THE SOLUTION: Schedules are marked as 'scheduled'
+$sql = "
+    SELECT * FROM (
+        SELECT 
+            users.full_name, 
+            tasks.task_description, 
+            tasks.task_status, 
+            tasks.created_at,
+            machines.machine_name, 
+            trash_bins.bin_type
         FROM tasks
         JOIN users ON tasks.user_id = users.user_id
         LEFT JOIN machines ON tasks.machine_id = machines.machine_id
         LEFT JOIN trash_bins ON tasks.bin_id = trash_bins.bin_id
-        $whereClause
-        ORDER BY tasks.created_at DESC
-        LIMIT $limit OFFSET $offset";
+        
+        UNION ALL
+        
+        SELECT 
+            users.full_name, 
+            CONCAT(schedules.task_description, ' (Routine)') AS task_description, 
+            'scheduled' AS task_status, 
+            schedules.created_at,
+            machines.machine_name, 
+            trash_bins.bin_type
+        FROM schedules
+        JOIN users ON schedules.user_id = users.user_id
+        LEFT JOIN machines ON schedules.machine_id = machines.machine_id
+        LEFT JOIN trash_bins ON schedules.bin_id = trash_bins.bin_id
+    ) AS combined_tables
+    $whereClause
+    ORDER BY created_at DESC
+    LIMIT $limit OFFSET $offset
+";
 $result = $conn->query($sql);
 
 // ---------------------------------------------------------
@@ -89,27 +124,27 @@ function relativeDate($timestamp) {
 // HELPER: staff initials (max 2 chars)
 // ---------------------------------------------------------
 function getInitials($name) {
-    $parts = explode(' ', trim($name));
+    $parts = explode(' ', trim($name ?? ''));
     $initials = '';
     foreach ($parts as $p) $initials .= strtoupper(substr($p, 0, 1));
     return substr($initials, 0, 2);
 }
 
-// Fetch Users for Modal dropdown (kept intact)
+// Fetch Users for Modal dropdown
 $users = [];
 $userResult = $conn->query("SELECT user_id, full_name FROM users ORDER BY full_name ASC");
 if ($userResult && $userResult->num_rows > 0) {
     while ($row = $userResult->fetch_assoc()) { $users[] = $row; }
 }
 
-// Fetch Machines for Modal dropdown (kept intact)
+// Fetch Machines for Modal dropdown
 $machines = [];
 $machineResult = $conn->query("SELECT machine_id, machine_name FROM machines ORDER BY machine_name ASC");
 if ($machineResult && $machineResult->num_rows > 0) {
     while ($row = $machineResult->fetch_assoc()) { $machines[] = $row; }
 }
 
-// Fetch Bins for JS modal (kept intact)
+// Fetch Bins for JS modal
 $bins = [];
 $binResult = $conn->query("SELECT bin_id, machine_id, bin_type FROM trash_bins ORDER BY bin_type ASC");
 if ($binResult && $binResult->num_rows > 0) {
@@ -121,7 +156,19 @@ if ($binResult && $binResult->num_rows > 0) {
 // ---------------------------------------------------------
 $page_title = "Tasks - Admin";
 $current_page = "tasks";
-$extra_css = '<link rel="stylesheet" href="/assets/css/pages/tasks.css" />';
+$extra_css = '
+<link rel="stylesheet" href="/assets/css/pages/tasks.css" />
+<style>
+  /* Extra styling for the Scheduled badge so it looks different from Pending */
+  .status-badge.scheduled {
+      background-color: #e0e7ff;
+      color: #3730a3;
+  }
+  .status-badge.scheduled .badge-dot {
+      background-color: #4f46e5;
+  }
+</style>
+';
 require_once __DIR__ . '/../layouts/header.php';
 ?>
 
@@ -144,7 +191,6 @@ require_once __DIR__ . '/../layouts/header.php';
     <div class="flash-msg flash-error"><i class='bx bx-error-circle'></i> <?= htmlspecialchars($_GET['error']) ?></div>
   <?php endif; ?>
 
-  <!-- ── Status Summary Bar ── -->
   <div class="summary-bar">
 
     <a href="/tasks.php?status=all" class="stat-card sf-all <?= ($cleanFilter === 'all' || $cleanFilter === '') ? 'active-filter' : '' ?>">
@@ -173,7 +219,6 @@ require_once __DIR__ . '/../layouts/header.php';
 
   </div>
 
-  <!-- ── Main Card ── -->
   <div class="card-custom">
 
     <div class="table-controls">
@@ -202,7 +247,6 @@ require_once __DIR__ . '/../layouts/header.php';
       </button>
     </div>
 
-    <!-- Table -->
     <div class="table-scroll-wrapper">
       <table class="task-table" id="taskTable">
         <thead>
@@ -221,10 +265,17 @@ require_once __DIR__ . '/../layouts/header.php';
               $initials   = getInitials($row['full_name']);
               $relDate    = relativeDate($timestamp);
 
-              $rawStatus    = strtolower(trim($row['task_status']));
+              $rawStatus    = strtolower(trim($row['task_status'] ?? ''));
               $statusClass  = 'pending';
               $displayText  = 'Pending';
-              if (str_contains($rawStatus, 'progress')) {
+              
+              if ($rawStatus === 'scheduled') {
+                  $statusClass = 'scheduled';
+                  $displayText = 'Scheduled';
+              } elseif (str_contains($rawStatus, 'pending')) {
+                  $statusClass = 'pending';
+                  $displayText = 'Pending';
+              } elseif (str_contains($rawStatus, 'progress')) {
                   $statusClass = 'in-progress';
                   $displayText = 'In Progress';
               } elseif (str_contains($rawStatus, 'done') || str_contains($rawStatus, 'complet')) {
@@ -233,24 +284,20 @@ require_once __DIR__ . '/../layouts/header.php';
               }
             ?>
             <tr>
-              <!-- Staff -->
               <td>
                 <div class="staff-cell">
                   <div class="mini-avatar"><?= $initials ?></div>
-                  <span class="staff-name"><?= htmlspecialchars($row['full_name']) ?></span>
+                  <span class="staff-name"><?= htmlspecialchars($row['full_name'] ?? 'Unassigned') ?></span>
                 </div>
               </td>
 
-              <!-- Kiosk / Bin -->
               <td>
                 <div class="kiosk-name"><?= htmlspecialchars($row['machine_name'] ?? 'Unknown Machine') ?></div>
                 <div class="bin-sub"><?= htmlspecialchars($row['bin_type'] ?? 'Unknown Bin') ?></div>
               </td>
 
-              <!-- Task Description -->
               <td class="task-desc"><?= htmlspecialchars($row['task_description']) ?></td>
 
-              <!-- Status -->
               <td>
                 <span class="status-badge <?= $statusClass ?>">
                   <span class="badge-dot"></span>
@@ -258,7 +305,6 @@ require_once __DIR__ . '/../layouts/header.php';
                 </span>
               </td>
 
-              <!-- Created -->
               <td data-time="<?= $timestamp ?>">
                 <div class="date-main"><?= htmlspecialchars(date('M d, Y', $timestamp)) ?></div>
               </td>
@@ -276,7 +322,6 @@ require_once __DIR__ . '/../layouts/header.php';
       </table>
     </div>
 
-    <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
     <div class="pagination-bar">
       <span class="pager-info">

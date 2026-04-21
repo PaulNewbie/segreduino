@@ -48,21 +48,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
     if ($stmt->execute()) {
         
-        // --- NEW CODE: AUTOMATICALLY CREATE A TASK ---
-        $task_status = 'pending'; // Default status for new tasks
-        
-        $task_stmt = $conn->prepare("INSERT INTO tasks (user_id, bin_id, machine_id, task_description, task_status, created_at) VALUES (?, ?, ?, ?, ?, ?)");
-        $task_stmt->bind_param("iiisss", $user_id, $bin_id, $machine_id, $task_description, $task_status, $created_at);
-        
-        // Execute the task insertion, but we don't necessarily need to block the schedule success if it fails, 
-        // though typically you'd log it if it failed.
-        if (!$task_stmt->execute()) {
-             error_log("Auto-Task Insert Error: " . $task_stmt->error);
+        $today_name = date('l'); // Gets today's day name (e.g., 'Wednesday')
+        $should_create_today = false;
+
+        // Check if the routine matches today
+        if (strtolower($recurrence_pattern) === 'daily') {
+            $should_create_today = true;
+        } elseif (strtolower($recurrence_pattern) === 'weekly' && strtolower($day_of_week) === strtolower($today_name)) {
+            $should_create_today = true;
         }
-        $task_stmt->close();
+
+        // Only insert into the active tasks list if it's meant for today
+        if ($should_create_today) {
+            $task_status = 'pending'; // Default status for new tasks
+            
+            $task_stmt = $conn->prepare("INSERT INTO tasks (user_id, bin_id, machine_id, task_description, task_status, created_at) VALUES (?, ?, ?, ?, ?, ?)");
+            $task_stmt->bind_param("iiisss", $user_id, $bin_id, $machine_id, $task_description, $task_status, $created_at);
+            
+            if (!$task_stmt->execute()) {
+                 error_log("Auto-Task Insert Error: " . $task_stmt->error);
+            }
+            $task_stmt->close();
+        }
         // ---------------------------------------------
 
         if (session_status() === PHP_SESSION_NONE) session_start();
+        // ... rest of your logging and redirection code ...
         $admin_id = $_SESSION['user_id'] ?? 0;
         $clean_desc = $conn->real_escape_string($task_description);
         $conn->query("INSERT INTO activity_logs (user_id, action, platform) VALUES ($admin_id, 'Created a new maintenance schedule: $clean_desc', 'Web')");

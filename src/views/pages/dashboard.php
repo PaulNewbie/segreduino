@@ -81,10 +81,14 @@ if ($r) $scheduleCount = $r->fetch_assoc()['c'];
 $taskPending = 0;
 $taskProgress = 0;
 $taskDone = 0;
-$r = $conn->query("SELECT task_status FROM tasks");
+$r = $conn->query("
+    SELECT task_status FROM tasks
+    UNION ALL
+    SELECT 'scheduled' AS task_status FROM schedules
+");
 if ($r) {
     while ($tr = $r->fetch_assoc()) {
-        $s = strtolower(trim($tr['task_status']));
+        $s = strtolower(trim($tr['task_status'] ?? ''));
         if (str_contains($s, 'pending'))                              $taskPending++;
         elseif (str_contains($s, 'progress'))                         $taskProgress++;
         elseif (str_contains($s, 'done') || str_contains($s, 'complet')) $taskDone++;
@@ -95,7 +99,7 @@ if ($r) {
 // HELPER: staff initials
 // ---------------------------------------------------------
 function getInitials($name) {
-    $parts = explode(' ', trim($name));
+    $parts = explode(' ', trim($name ?? ''));
     $initials = '';
     foreach ($parts as $p) $initials .= strtoupper(substr($p, 0, 1));
     return substr($initials, 0, 2);
@@ -106,7 +110,19 @@ function getInitials($name) {
 // ---------------------------------------------------------
 $page_title  = "Dashboard - Admin";
 $current_page = "dashboard";
-$extra_css   = '<link rel="stylesheet" href="/assets/css/pages/dashboard.css" />';
+$extra_css   = '
+<link rel="stylesheet" href="/assets/css/pages/dashboard.css" />
+<style>
+  /* Status Badge UI consistency for Scheduled items */
+  .status-badge.scheduled {
+      background-color: #e0e7ff;
+      color: #3730a3;
+  }
+  .status-badge.scheduled .badge-dot {
+      background-color: #4f46e5;
+  }
+</style>
+';
 require_once __DIR__ . '/../layouts/header.php';
 ?>
 
@@ -122,7 +138,6 @@ require_once __DIR__ . '/../layouts/header.php';
     </div>
   </div>
 
-  <!-- ── Bin Status Cards (kept intact) ── -->
   <div class="bin-grid" id="binGrid">
     <?php foreach ($bin_types as $type): ?>
       <?php
@@ -144,10 +159,8 @@ require_once __DIR__ . '/../layouts/header.php';
     <?php endforeach; ?>
   </div>
 
-  <!-- ── Side-by-side panels ── -->
   <div class="dash-panels">
 
-    <!-- LEFT: Recent Schedules -->
     <div class="dash-panel">
       <div class="panel-header">
         <div class="panel-title-group">
@@ -194,7 +207,7 @@ require_once __DIR__ . '/../layouts/header.php';
                 <td>
                   <div class="staff-cell">
                     <div class="mini-avatar"><?= $initials ?></div>
-                    <span><?= htmlspecialchars($row['full_name']) ?></span>
+                    <span><?= htmlspecialchars($row['full_name'] ?? 'Unassigned') ?></span>
                   </div>
                 </td>
                 <td><?= htmlspecialchars($row['floor_level']) ?></td>
@@ -208,13 +221,11 @@ require_once __DIR__ . '/../layouts/header.php';
         </table>
       </div>
 
-      <!-- View all — always visible, pinned to bottom -->
       <a href="/schedules.php" class="view-all-btn">
         View all schedules <i class='bx bx-right-arrow-alt'></i>
       </a>
     </div>
 
-    <!-- RIGHT: Recent Tasks -->
     <div class="dash-panel">
       <div class="panel-header">
         <div class="panel-title-group">
@@ -237,6 +248,7 @@ require_once __DIR__ . '/../layouts/header.php';
         <input type="text" id="searchTask" class="filter-input" placeholder="Search..." onkeyup="runTaskFilter()">
         <select id="statusTask" class="filter-select" onchange="runTaskFilter()">
           <option value="all">All</option>
+          <option value="scheduled">Scheduled</option>
           <option value="pending">Pending</option>
           <option value="in progress">In Progress</option>
           <option value="done">Done</option>
@@ -255,28 +267,66 @@ require_once __DIR__ . '/../layouts/header.php';
           </thead>
           <tbody>
             <?php
-            $sql = "SELECT users.full_name, tasks.task_description, tasks.task_status, tasks.created_at,
-                           machines.machine_name, trash_bins.bin_type
+            $sql = "
+                SELECT * FROM (
+                    SELECT 
+                        users.full_name, 
+                        tasks.task_description, 
+                        tasks.task_status, 
+                        tasks.created_at,
+                        machines.machine_name, 
+                        trash_bins.bin_type
                     FROM tasks
                     JOIN users ON tasks.user_id = users.user_id
                     LEFT JOIN machines ON tasks.machine_id = machines.machine_id
                     LEFT JOIN trash_bins ON tasks.bin_id = trash_bins.bin_id
-                    ORDER BY tasks.created_at DESC LIMIT 8";
+                    
+                    UNION ALL
+                    
+                    SELECT 
+                        users.full_name, 
+                        CONCAT(schedules.task_description, ' (Routine)') AS task_description, 
+                        'scheduled' AS task_status, 
+                        schedules.created_at,
+                        machines.machine_name, 
+                        trash_bins.bin_type
+                    FROM schedules
+                    JOIN users ON schedules.user_id = users.user_id
+                    LEFT JOIN machines ON schedules.machine_id = machines.machine_id
+                    LEFT JOIN trash_bins ON schedules.bin_id = trash_bins.bin_id
+                ) AS combined_tables
+                ORDER BY created_at DESC LIMIT 8
+            ";
+            
             $res = $conn->query($sql);
             if ($res && $res->num_rows > 0):
                 while ($row = $res->fetch_assoc()):
                     $ts       = strtotime($row['created_at']);
                     $initials = getInitials($row['full_name']);
-                    $raw      = strtolower(trim($row['task_status']));
+                    
+                    // Same UI logic used in tasks.php
+                    $raw      = strtolower(trim($row['task_status'] ?? ''));
                     $cls = 'pending'; $label = 'Pending';
-                    if (str_contains($raw,'progress')) { $cls='in-progress'; $label='In Progress'; }
-                    elseif (str_contains($raw,'done')||str_contains($raw,'complet')) { $cls='done'; $label='Completed'; }
+                    
+                    if ($raw === 'scheduled') {
+                        $cls = 'scheduled';
+                        $label = 'Scheduled';
+                    } elseif (str_contains($raw, 'pending')) {
+                        $cls = 'pending';
+                        $label = 'Pending';
+                    } elseif (str_contains($raw, 'progress')) { 
+                        $cls = 'in-progress'; 
+                        $label = 'In Progress'; 
+                    } elseif (str_contains($raw, 'done') || str_contains($raw, 'complet')) { 
+                        $cls = 'done'; 
+                        $label = 'Completed'; 
+                    }
             ?>
               <tr>
                 <td>
                   <div class="staff-cell">
                     <div class="mini-avatar"><?= $initials ?></div>
-                    <span><?= htmlspecialchars($row['full_name']) ?></span>
+                    <span><?= htmlspecialchars($row['full_name'] ?? 'Unassigned') ?></span>
                   </div>
                 </td>
                 <td>
@@ -297,14 +347,12 @@ require_once __DIR__ . '/../layouts/header.php';
         </table>
       </div>
 
-      <!-- View all — always visible, pinned to bottom -->
       <a href="/tasks.php" class="view-all-btn">
         View all tasks <i class='bx bx-right-arrow-alt'></i>
       </a>
     </div>
 
-  </div><!-- /.dash-panels -->
-</main>
+  </div></main>
 
 <?php include __DIR__ . '/../components/add_schedule_modal.php'; ?>
 <?php include __DIR__ . '/../components/add_task_modal.php'; ?>
