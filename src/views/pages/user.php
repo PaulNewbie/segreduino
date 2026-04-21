@@ -11,7 +11,57 @@ if ($conn->connect_error) { die("Connection failed: " . $conn->connect_error); }
 
 $page_title = "User Management - Admin";
 $current_page = "user"; 
-$extra_css = '<link rel="stylesheet" href="/assets/css/pages/user.css" />'; 
+$extra_css = '
+<link rel="stylesheet" href="/assets/css/pages/user.css" />
+<style>
+  /* Initials Avatar Fallback CSS */
+  .mini-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #e8f5e9;
+      color: #16a34a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 10px;
+      flex-shrink: 0;
+      letter-spacing: 0.3px;
+  }
+
+  /* Avatar Image Viewer Modal CSS */
+  .avatar-modal-overlay {
+      display: none; 
+      position: fixed; z-index: 9999; 
+      align-items: center; justify-content: center;
+      left: 0; top: 0; 
+      width: 100%; height: 100%; 
+      background-color: rgba(0,0,0,0.7);
+      backdrop-filter: blur(3px);
+  }
+  .avatar-modal-content {
+      display: block; 
+      width: 90%; max-width: 350px; 
+      border-radius: 50%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      object-fit: cover;
+      aspect-ratio: 1 / 1;
+      animation: zoomIn 0.2s ease-out;
+  }
+  .avatar-modal-close {
+      position: absolute; top: 30px; right: 40px; 
+      color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer;
+      transition: color 0.2s;
+  }
+  .avatar-modal-close:hover { color: #fff; }
+  
+  @keyframes zoomIn {
+      from {transform: scale(0.8); opacity: 0;}
+      to {transform: scale(1); opacity: 1;}
+  }
+</style>
+'; 
 require_once __DIR__ . '/../layouts/header.php'; 
 ?>
 
@@ -54,25 +104,26 @@ require_once __DIR__ . '/../layouts/header.php';
                 <th class="sortable" onclick="sortTable('dirTable', 0)">Name <i class='bx bx-sort sort-icon'></i></th>
                 <th class="sortable" onclick="sortTable('dirTable', 1)">Role <i class='bx bx-sort sort-icon'></i></th>
                 <th class="sortable" onclick="sortTable('dirTable', 2)">Email <i class='bx bx-sort sort-icon'></i></th>
-                <th class="sortable" onclick="sortTable('dirTable', 3)">Status <i class='bx bx-sort sort-icon'></i></th>
+                <th class="sortable" onclick="sortTable('dirTable', 3)">Phone <i class='bx bx-sort sort-icon'></i></th>
+                <th class="sortable" onclick="sortTable('dirTable', 4)">Status <i class='bx bx-sort sort-icon'></i></th>
                 </tr>
             </thead>
             <tbody>
               <?php
-                $sql = "SELECT id as user_id, CONCAT(first_name, ' ', last_name) AS full_name, role, status, email 
+                $sql = "SELECT id as user_id, CONCAT(first_name, ' ', last_name) AS full_name, role, status, email, NULL as phone, avatar 
                         FROM admin_users WHERE role = 'admin'
                         UNION 
-                        SELECT user_id, full_name, role, status, email 
+                        SELECT user_id, full_name, role, status, email, phone, avatar 
                         FROM users WHERE role = 'staff' ORDER BY role ASC, full_name ASC";
                 $result = $conn->query($sql);
+                
                 if ($result && $result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
-                        // 1. Role Badge
+                        
                         $roleClass = (strtolower($row["role"]) === 'admin') ? 'role-admin' : 'role-staff';
                         
-                        // 2. Native PHP Status Badge
                         $rawStatus = strtolower(trim($row["status"] ?? ''));
-                        $statusClass = 'status-loading'; // Default gray
+                        $statusClass = 'status-loading'; 
                         $displayStatus = 'Unknown';
                         
                         if ($rawStatus === 'active' || $rawStatus === '1') {
@@ -82,15 +133,37 @@ require_once __DIR__ . '/../layouts/header.php';
                             $statusClass = 'status-inactive';
                             $displayStatus = 'Inactive';
                         } elseif ($rawStatus !== '') {
-                            // Catches any other statuses your database might use
                             $displayStatus = ucfirst($rawStatus);
                         }
 
+                        $initials = '';
+                        $parts = explode(' ', trim($row['full_name'] ?? ''));
+                        foreach ($parts as $p) {
+                            if (!empty($p)) $initials .= strtoupper(substr($p, 0, 1));
+                        }
+                        $initials = substr($initials, 0, 2);
+
                         echo '<tr>';
-                        echo '<td><strong>' . htmlspecialchars($row["full_name"]) . '</strong></td>';
+                        
+                        // --- NAME AND AVATAR COLUMN ---
+                        echo '<td>';
+                        echo '<div style="display: flex; align-items: center; gap: 12px;">';
+                        
+                        if (!empty($row['avatar'])) {
+                            // Render clickable Image matching the 28px constraint
+                            echo '<img src="' . htmlspecialchars($row['avatar']) . '" alt="Avatar" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 1px solid #eee; flex-shrink: 0;" onclick="openAvatarModal(this.src)" title="Click to view full image">';
+                        } else {
+                            // Render Initials using your custom CSS class
+                            echo '<div class="mini-avatar">' . htmlspecialchars($initials) . '</div>';
+                        }
+                        
+                        echo '<strong>' . htmlspecialchars($row["full_name"]) . '</strong>';
+                        echo '</div>';
+                        echo '</td>';
+
                         echo '<td><span class="badge ' . $roleClass . '">' . htmlspecialchars(ucfirst($row["role"])) . '</span></td>';
                         echo '<td>' . htmlspecialchars($row["email"]) . '</td>';
-                        // Render the badge natively!
+                        echo '<td style="color: #666;">' . htmlspecialchars($row["phone"] ?? '—') . '</td>';
                         echo '<td><span class="badge ' . $statusClass . '">' . htmlspecialchars($displayStatus) . '</span></td>';
                         echo '</tr>';
                     }
@@ -169,7 +242,6 @@ require_once __DIR__ . '/../layouts/header.php';
                 </thead>
                 <tbody>
                     <?php
-                    // Fix the ID overlap by joining based on the Platform
                     $log_sql = "SELECT a.*, 
                         CASE 
                             WHEN a.platform = 'Web' THEN CONCAT(au.first_name, ' ', au.last_name)
@@ -193,11 +265,9 @@ require_once __DIR__ . '/../layouts/header.php';
                             $platformClass = ($log['platform'] === 'Web') ? 'badge-web' : 'badge-mobile';
                             $displayName = $log['display_name'] ? $log['display_name'] : 'User #' . $log['user_id'];
                             
-                            
                             echo "<tr>";
                             echo "<td>" . date('M d, Y h:i A', strtotime($log['created_at'])) . "</td>";
                             
-                            // Display the name WITH a tiny badge indicating if they are Admin or Staff
                             $roleBadge = ($log['role'] === 'Admin') ? '<span class="badge role-admin" style="font-size:10px; padding:2px 4px; margin-left:5px;">Admin</span>' : '<span class="badge role-staff" style="font-size:10px; padding:2px 4px; margin-left:5px;">Staff</span>';
                             
                             echo "<td><strong>" . htmlspecialchars($displayName) . "</strong>" . $roleBadge . "</td>";
@@ -217,6 +287,11 @@ require_once __DIR__ . '/../layouts/header.php';
   </div>
 </main>
 
+<div id="avatarModal" class="avatar-modal-overlay" onclick="closeAvatarModal()">
+    <span class="avatar-modal-close" onclick="closeAvatarModal()">&times;</span>
+    <img class="avatar-modal-content" id="avatarModalImg">
+</div>
+
 <?php ob_start(); ?>
 
 <script src="/assets/js/table-utils.js"></script>
@@ -230,7 +305,26 @@ function switchTab(evt, tabId) {
     evt.currentTarget.classList.add('active');
 }
 
-// --- 2. CLEAN UTILITY FILTER TRIGGERS ---
+// --- 2. AVATAR MODAL LOGIC ---
+function openAvatarModal(src) {
+    var modal = document.getElementById("avatarModal");
+    var modalImg = document.getElementById("avatarModalImg");
+    modal.style.display = "flex";
+    modalImg.src = src;
+}
+
+function closeAvatarModal() {
+    document.getElementById("avatarModal").style.display = "none";
+}
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === "Escape") {
+        closeAvatarModal();
+    }
+});
+
+
+// --- 3. CLEAN UTILITY FILTER TRIGGERS ---
 function filterDirectory() {
     filterGenericTable({
         tableId: 'dirTable',
@@ -261,8 +355,6 @@ function filterActivity() {
         timeCol: 0 // Date is in column index 0
     });
 }
-
-// Note: sortTable() is completely removed here because it's handled by table-utils.js natively!
 
 </script>
 <?php 

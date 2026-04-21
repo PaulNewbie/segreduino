@@ -56,7 +56,7 @@ if ($result) { while ($row = $result->fetch_assoc()) { $kiosks[] = $row; } }
 
 // Modal data (kept intact)
 $users = [];
-$userResult = $conn->query("SELECT user_id, full_name FROM users ORDER BY full_name ASC");
+$userResult = $conn->query("SELECT user_id, full_name, avatar FROM users ORDER BY full_name ASC");
 if ($userResult && $userResult->num_rows > 0) {
     while ($row = $userResult->fetch_assoc()) { $users[] = $row; }
 }
@@ -194,7 +194,7 @@ require_once __DIR__ . '/../layouts/header.php';
           </thead>
           <tbody>
             <?php
-            $sql = "SELECT users.full_name, schedules.floor_level, schedules.task_description, schedules.schedule_date
+            $sql = "SELECT users.full_name, users.avatar, schedules.floor_level, schedules.task_description, schedules.schedule_date
                     FROM schedules JOIN users ON schedules.user_id = users.user_id
                     ORDER BY schedules.schedule_date ASC LIMIT 8";
             $res = $conn->query($sql);
@@ -206,7 +206,11 @@ require_once __DIR__ . '/../layouts/header.php';
               <tr>
                 <td>
                   <div class="staff-cell">
-                    <div class="mini-avatar"><?= $initials ?></div>
+                    <?php if (!empty($row['avatar'])): ?>
+                        <img src="<?= htmlspecialchars($row['avatar']) ?>" alt="Avatar" class="mini-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                    <?php else: ?>
+                        <div class="mini-avatar"><?= $initials ?></div>
+                    <?php endif; ?>
                     <span><?= htmlspecialchars($row['full_name'] ?? 'Unassigned') ?></span>
                   </div>
                 </td>
@@ -271,6 +275,7 @@ require_once __DIR__ . '/../layouts/header.php';
                 SELECT * FROM (
                     SELECT 
                         users.full_name, 
+                        users.avatar,
                         tasks.task_description, 
                         tasks.task_status, 
                         tasks.created_at,
@@ -285,6 +290,7 @@ require_once __DIR__ . '/../layouts/header.php';
                     
                     SELECT 
                         users.full_name, 
+                        users.avatar,
                         CONCAT(schedules.task_description, ' (Routine)') AS task_description, 
                         'scheduled' AS task_status, 
                         schedules.created_at,
@@ -325,7 +331,11 @@ require_once __DIR__ . '/../layouts/header.php';
               <tr>
                 <td>
                   <div class="staff-cell">
-                    <div class="mini-avatar"><?= $initials ?></div>
+                    <?php if (!empty($row['avatar'])): ?>
+                        <img src="<?= htmlspecialchars($row['avatar']) ?>" alt="Avatar" class="mini-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                    <?php else: ?>
+                        <div class="mini-avatar"><?= $initials ?></div>
+                    <?php endif; ?>
                     <span><?= htmlspecialchars($row['full_name'] ?? 'Unassigned') ?></span>
                   </div>
                 </td>

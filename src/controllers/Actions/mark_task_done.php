@@ -19,15 +19,19 @@ if (!isset($data['task_id']) || empty($data['task_id'])) {
 
 $task_id = intval($data['task_id']);
 
- require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/config.php';
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed']);
     exit;
 }
 
-// ✅ Update only if the task is not already completed
-$stmt = $conn->prepare("UPDATE tasks SET task_status = 'Completed' WHERE task_id = ? AND task_status != 'Completed'");
-$stmt->bind_param("i", $task_id);
+// ✅ Force Philippine Timezone
+date_default_timezone_set('Asia/Manila');
+$current_time = date('Y-m-d H:i:s');
+
+// ✅ Update the status and insert the exact PHP-generated time
+$stmt = $conn->prepare("UPDATE tasks SET task_status = 'Completed', completed_at = ? WHERE task_id = ? AND task_status != 'Completed'");
+$stmt->bind_param("si", $current_time, $task_id);
 $stmt->execute();
 
 if ($stmt->affected_rows > 0) {
@@ -37,5 +41,4 @@ if ($stmt->affected_rows > 0) {
 }
 
 $stmt->close();
-
 ?>

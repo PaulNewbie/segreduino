@@ -49,6 +49,7 @@ $sql = "
         s.schedule_id,
         s.user_id,
         u.full_name,
+        u.avatar,
         s.floor_level,
         s.task_description,
         s.schedule_date,
@@ -82,7 +83,7 @@ if ($result && $result->num_rows > 0) {
 
 // Fetch Users for Modal dropdown (kept for add_schedule_modal.php)
 $users = [];
-$userResult = $conn->query("SELECT user_id, full_name FROM users ORDER BY full_name ASC");
+$userResult = $conn->query("SELECT user_id, full_name, avatar FROM users ORDER BY full_name ASC");
 if ($userResult && $userResult->num_rows > 0) {
     while ($row = $userResult->fetch_assoc()) {
         $users[] = $row;
@@ -185,7 +186,11 @@ require_once __DIR__ . '/../layouts/header.php';
              data-patterns="<?= htmlspecialchars(strtolower(implode(',', array_column($staff['routines'], 'recurrence_pattern')))) ?>"
              onclick="openStaffModal(<?= htmlspecialchars(json_encode($staff)) ?>)">
           <div class="staff-card-header">
-            <div class="staff-avatar"><?= $initials ?></div>
+            <?php if (!empty($row['avatar'])): ?>
+                <img src="<?= htmlspecialchars($row['avatar']) ?>" alt="Avatar" class="mini-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+            <?php else: ?>
+                <div class="mini-avatar"><?= $initials ?></div>
+            <?php endif; ?>
             <div class="staff-info">
               <div class="staff-name"><?= htmlspecialchars($staff['full_name']) ?></div>
               <div class="staff-meta"><?= $routineCount ?> routine<?= $routineCount !== 1 ? 's' : '' ?> assigned</div>
